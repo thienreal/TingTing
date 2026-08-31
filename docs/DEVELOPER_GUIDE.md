@@ -110,7 +110,7 @@ Khi mới clone dự án, chạy `cp backend/.env.example backend/.env` rồi đ
 | `OTP_EXPIRY_SECONDS` | `300` | Thời gian hiệu lực OTP (giây). `300` = 5 phút |
 | `POINTS_RATIO` | `10000` | Tỷ lệ quy đổi: 10,000 VND = 1 Điểm |
 | `MEMBERSHIP_TIERS_CONFIG` | `{"STANDARD":0,...}` | Cấu hình các hạng thành viên |
-| `FCM_SERVER_KEY` | `firebase_key` | Key gửi Push Notification từ Firebase |
+| `WEBSOCKET_PORT` | `3001` | Cổng cho kết nối Real-time WebSocket |
 
 > **Cảnh báo Production:** Đặt `TYPEORM_SYNC=false` và `TYPEORM_LOGGING=false`. Đổi `JWT_SECRET` thành chuỗi ngẫu nhiên.
 

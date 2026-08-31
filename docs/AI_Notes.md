@@ -284,3 +284,28 @@
 - **Thông tin cần lưu ý & Thông số kỹ thuật:**
   - Các app Flutter đã dùng các biến cấu hình từ `theme.dart` với mã màu Vàng `#FAD240` và Hồng `#E8687D` chuẩn thiết kế.
   - `backend/.env` đã đầy đủ biến kết nối DB và cấu hình nghiệp vụ.
+
+## Đồng bộ hóa kiến trúc WebSocket thay cho FCM - 2026-08-31
+- **Ngày giờ thực hiện:** 2026-08-31 15:33:00
+- **Các công việc đã thực hiện:**
+  1. Xóa bỏ các từ khóa liên quan đến FCM (Firebase Cloud Messaging) bị sót lại trong các tài liệu.
+  2. Cập nhật Mục 1.5 trong `docs/task_tracker.md` thành "Tích hợp WebSocket (Real-time Notification)".
+  3. Đổi biến `FCM_SERVER_KEY` thành `WEBSOCKET_PORT` trong `docs/DEVELOPER_GUIDE.md`, `backend/.env.example` và `backend/.env`.
+- **Lý do:** Khách hàng review tài liệu và phát hiện ra sự bất đồng nhất (tài liệu vẫn ghi dùng FCM mặc dù đã thống nhất dùng WebSocket cho môi trường deploy Localhost).
+- **Mục đích:** Khắc phục lỗi sai sót của AI trong quá trình cập nhật tài liệu trước đó, đảm bảo toàn bộ dự án từ docs đến file cấu hình đều đồng bộ 100% về kiến trúc WebSocket.
+- **Lợi ích:** Tránh gây nhầm lẫn cho developer khi đọc tài liệu và khi bắt đầu code tính năng Push Notification.
+- **Thông tin cần lưu ý & Thông số kỹ thuật:**
+  - Dự án không sử dụng Firebase cho tính năng push notification (do khó gọi từ localhost).
+  - Sử dụng Socket.IO tại cổng cấu hình `WEBSOCKET_PORT=3001` để thay thế.
+
+## Đánh dấu hoàn thành 5 Entity thuộc Task 1.2 - 2026-08-31
+- **Ngày giờ thực hiện:** 2026-08-31 15:35:00
+- **Các công việc đã thực hiện:**
+  1. Kiểm tra xác nhận 5 Entity (Users, Merchants, Transactions, Vouchers, UserVouchers) đã được tạo và đặt chuẩn trong `backend/src/modules/*/entities/`.
+  2. Cập nhật `docs/task_tracker.md` đánh dấu hoàn thành (`[x]`) cho 5 task tạo Entity đầu tiên trong mục 1.2.
+- **Lý do:** Người dùng yêu cầu tạo Entity (5 dòng đầu) mục 1.2. Qua kiểm tra mã nguồn, các Entity này đã được tạo từ trước. Vì thế tiến hành đối chiếu và đánh dấu hoàn thành.
+- **Mục đích:** Cập nhật Task Tracker đúng với trạng thái thực tế của mã nguồn để chuẩn bị cho các công việc tiếp theo (Migration và Seed).
+- **Lợi ích:** Tránh việc tạo lại code trùng lặp, đảm bảo Task Tracker phản ánh chính xác tình trạng dự án.
+- **Thông tin cần lưu ý & Thông số kỹ thuật:**
+  - Các Entity đã dùng TypeORM (`@Entity`, `@PrimaryGeneratedColumn('uuid')`).
+  - Vị trí: `backend/src/modules/{tên_module}/entities/*.entity.ts`.

@@ -39,11 +39,11 @@
 
 ### 1.2 Thiết kế Database Schema & Seed Data
 
-- [ ] Tạo Entity `Users`: `id`, `phone_number`, `full_name`, `total_points`, `membership_tier`, `created_at`.
-- [ ] Tạo Entity `Merchants`: `id`, `name`, `category`, `qr_static_code`, `is_active`, `created_at`.
-- [ ] Tạo Entity `Transactions`: `id`, `user_id`, `merchant_id`, `type`, `points_delta`, `bill_amount`, `created_at`.
-- [ ] Tạo Entity `Vouchers`: `id`, `merchant_id`, `title`, `description`, `points_cost`, `total_quantity`, `remaining_quantity`, `expired_at`.
-- [ ] Tạo Entity `UserVouchers`: `id`, `user_id`, `voucher_id`, `status` (ACTIVE, USED, EXPIRED), `redeemed_at`.
+- [x] Tạo Entity `Users`: `id`, `phone_number`, `full_name`, `total_points`, `membership_tier`, `created_at`.
+- [x] Tạo Entity `Merchants`: `id`, `name`, `category`, `qr_static_code`, `is_active`, `created_at`.
+- [x] Tạo Entity `Transactions`: `id`, `user_id`, `merchant_id`, `type`, `points_delta`, `bill_amount`, `created_at`.
+- [x] Tạo Entity `Vouchers`: `id`, `merchant_id`, `title`, `description`, `points_cost`, `total_quantity`, `remaining_quantity`, `expired_at`.
+- [x] Tạo Entity `UserVouchers`: `id`, `user_id`, `voucher_id`, `status` (ACTIVE, USED, EXPIRED), `redeemed_at`.
 - [ ] Viết TypeORM migration tạo bảng.
 - [ ] **Viết script seed data:** Sinh ra ~10 Merchant mẫu thực tế, 20 User, 30 Voucher đa dạng mức điểm, 50 Transaction (Phục vụ Demo).
 
@@ -81,11 +81,11 @@
 
 ---
 
-### 1.5 Tích hợp Firebase Cloud Messaging (Push Notification)
+### 1.5 Tích hợp WebSocket (Real-time Notification)
 
-- [ ] Tạo project Firebase, lấy `FCM_SERVER_KEY`.
-- [ ] Tích hợp gửi Push khi gọi `POST /points/earn` thành công (Báo User có điểm).
-- [ ] Flutter `app_user`: Xử lý hiển thị thông báo.
+- [ ] Cài đặt `socket.io` trong backend, cấu hình `WEBSOCKET_PORT` (nếu cần).
+- [ ] Tích hợp phát sự kiện (emit) qua WebSocket khi gọi `POST /points/earn` thành công (Báo User có điểm).
+- [ ] Flutter `app_user`: Kết nối WebSocket, lắng nghe sự kiện để hiển thị thông báo.
 
 ---
 
