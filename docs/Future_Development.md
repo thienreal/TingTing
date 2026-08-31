@@ -6,6 +6,7 @@ Tài liệu này ghi nhận các tính năng, hạ tầng và kế hoạch mở 
 
 ## 1. Hạ tầng & Triển khai (Infrastructure & Deployment)
 - **Triển khai thực tế (Cloud Deployment):** Hiện tại hệ thống (Backend Node.js & PostgreSQL) đang chạy trên môi trường Local. Trong tương lai, hệ thống sẽ được deploy lên các nền tảng Cloud thực tế (như AWS, Google Cloud, hoặc VPS DigitalOcean, Vultr) để vận hành chính thức và mở rộng quy mô.
+- **Bảo mật Database (TypeORM Migration):** Để tiện cho người dùng test MVP chỉ với một lệnh `npm run start:dev`, biến `TYPEORM_SYNC` đang được đặt là `true` (tự động tạo bảng). Trong giai đoạn triển khai thực tế (Production) hoặc khi phát triển mở rộng, BẮT BUỘC phải đổi `TYPEORM_SYNC=false` và chuyển sang sử dụng TypeORM Migrations (`npm run migration:run`) để tránh rủi ro mất mát hoặc xung đột cấu trúc dữ liệu.
 - **Tích hợp SMS OTP Thực tế:** Thay thế cơ chế Mock OTP (`000000`) hiện tại bằng việc tích hợp các nhà cung cấp dịch vụ SMS Gateway thật (Twilio, ESMS.vn, Stringee) để gửi mã xác thực đến số điện thoại người dùng.
 
 ## 2. Admin Dashboard (Hệ thống Quản trị Nền tảng)

@@ -44,8 +44,8 @@
 - [x] Tạo Entity `Transactions`: `id`, `user_id`, `merchant_id`, `type`, `points_delta`, `bill_amount`, `created_at`.
 - [x] Tạo Entity `Vouchers`: `id`, `merchant_id`, `title`, `description`, `points_cost`, `total_quantity`, `remaining_quantity`, `expired_at`.
 - [x] Tạo Entity `UserVouchers`: `id`, `user_id`, `voucher_id`, `status` (ACTIVE, USED, EXPIRED), `redeemed_at`.
-- [ ] Viết TypeORM migration tạo bảng.
-- [ ] **Viết script seed data:** Sinh ra ~10 Merchant mẫu thực tế, 20 User, 30 Voucher đa dạng mức điểm, 50 Transaction (Phục vụ Demo).
+- [x] Viết TypeORM migration tạo bảng.
+- [x] **Viết script seed data:** Sinh ra ~10 Merchant mẫu thực tế, 20 User, 30 Voucher đa dạng mức điểm, 50 Transaction (Phục vụ Demo).
 
 ---
 

@@ -72,7 +72,7 @@ POSTGRES_USER=postgres
 POSTGRES_PASSWORD=your_password
 POSTGRES_DB=tingting_db
 
-TYPEORM_SYNC=true     # Cho phép TypeORM tự động tạo bảng (chỉ dùng trong môi trường dev)
+TYPEORM_SYNC=true     # Cho phép TypeORM tự động tạo bảng khi bật server (chỉ dùng cho MVP/Dev)
 JWT_SECRET=           # Thay bằng 1 chuỗi bí mật, càng dài càng tốt
 ```
 
@@ -95,11 +95,24 @@ docker-compose up -d
 ### 2.5 Chạy Backend Server
 
 ```bash
-# Chạy ở chế độ dev (tự động reload khi sửa code)
+# Chạy ở chế độ dev (tự động reload khi sửa code, TypeORM sẽ tự động sinh bảng nhờ TYPEORM_SYNC=true)
 npm run start:dev
 
 # Server sẽ chạy tại: http://localhost:3000
 # WebSocket sẽ chạy tại: ws://localhost:3001
+```
+
+### 2.6 Nạp dữ liệu mẫu - Seed Data (Tùy chọn)
+
+Nếu bạn đang cài đặt môi trường để Code/Test/Demo MVP, bạn **RẤT NÊN** chạy lệnh sau để bơm dữ liệu giả lập (Merchants, Users, Vouchers) vào database. Nếu không, app sẽ hoàn toàn trống trơn.
+
+> **Lưu ý 1:** Chỉ chạy lệnh này **SAU KHI** server ở Bước 2.5 đã chạy ít nhất 1 lần (để TypeORM kịp tạo các bảng).
+> **Lưu ý 2 (QUAN TRỌNG):** Lệnh này sẽ **XÓA SẠCH toàn bộ dữ liệu cũ** trong database trước khi nạp dữ liệu mẫu mới. Tuyệt đối không chạy lệnh này nếu bạn đang có dữ liệu quan trọng.
+> 
+> Bạn hãy mở một tab Terminal mới (vẫn ở trong thư mục `backend`) và gõ:
+
+```bash
+npm run seed
 ```
 
 ---

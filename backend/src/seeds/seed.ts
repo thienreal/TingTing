@@ -25,11 +25,11 @@ export async function runSeed(dataSource: DataSource) {
   const userVoucherRepository = dataSource.getRepository(UserVoucher);
 
   // Xóa dữ liệu cũ để tránh lỗi unique constraint (theo thứ tự khóa ngoại)
-  await userVoucherRepository.delete({});
-  await transactionRepository.delete({});
-  await voucherRepository.delete({});
-  await merchantRepository.delete({});
-  await userRepository.delete({});
+  await userVoucherRepository.createQueryBuilder().delete().execute();
+  await transactionRepository.createQueryBuilder().delete().execute();
+  await voucherRepository.createQueryBuilder().delete().execute();
+  await merchantRepository.createQueryBuilder().delete().execute();
+  await userRepository.createQueryBuilder().delete().execute();
 
   // Sinh 10 Merchant
   const merchantsData = [];

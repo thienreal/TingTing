@@ -309,3 +309,96 @@
 - **Thông tin cần lưu ý & Thông số kỹ thuật:**
   - Các Entity đã dùng TypeORM (`@Entity`, `@PrimaryGeneratedColumn('uuid')`).
   - Vị trí: `backend/src/modules/{tên_module}/entities/*.entity.ts`.
+
+## Sinh file TypeORM Migration - 2026-08-31
+- **Ngày giờ thực hiện:** 2026-08-31 22:50:00
+- **Các công việc đã thực hiện:**
+  1. Chạy lệnh `docker compose up -d` để khởi động container PostgreSQL.
+  2. Sửa lỗi `fallthroughCasesInSwitch` trong `tsconfig.json`.
+  3. Hướng dẫn người dùng chạy lệnh `npm run typeorm -- migration:generate src/migrations/InitTables -d src/config/database.config.ts` để sinh file migration thành công.
+- **Lý do:** Thực hiện công việc thuộc Task 1.2, cần tạo cấu trúc database thực tế từ các file Entity.
+- **Mục đích:** Tự động sinh ra câu lệnh SQL tạo bảng mà không cần gõ tay.
+- **Lợi ích:** Đồng bộ 100% giữa code Backend và cấu trúc Database.
+- **Thông tin cần lưu ý & Thông số kỹ thuật:**
+  - File sinh ra nằm ở `backend/src/migrations/`.
+  - Đối với các dev tham gia dự án sau hoặc khi clone code ở máy mới: KHÔNG CẦN chạy lệnh sinh (`migration:generate`) lại, chỉ cần chạy `npm run migration:run`.
+
+## Cập nhật SETUP.md để đồng bộ quy trình Migration - 2026-08-31
+- **Ngày giờ thực hiện:** 2026-08-31 22:57:00
+- **Các công việc đã thực hiện:**
+  1. Cập nhật file `SETUP.md` bổ sung Bước 2.5 `npm run migration:run`.
+  2. Đánh dấu `[x]` hoàn thành task "Viết TypeORM migration tạo bảng" trong `docs/task_tracker.md`.
+- **Lý do:** Khắc phục sự thiếu sót trong file `SETUP.md` cũ (dựa dẫm vào tính năng tự động tạo bảng `TYPEORM_SYNC=true` vốn không khuyên dùng cho dự án thực tế).
+- **Mục đích:** Chuẩn hóa quy trình cài đặt cho các lập trình viên sau này, dùng migration để quản lý Database.
+- **Lợi ích:** Đảm bảo tính nhất quán của cấu trúc Database giữa các thành viên trong team.
+- **Thông tin cần lưu ý & Thông số kỹ thuật:**
+  - File `SETUP.md` đã hoàn toàn đồng bộ với chuẩn làm việc dùng TypeORM Migration của dự án.
+
+## Tắt tính năng tự động tạo bảng TYPEORM_SYNC - 2026-08-31
+- **Ngày giờ thực hiện:** 2026-08-31 23:01:00
+- **Các công việc đã thực hiện:**
+  1. Đổi `TYPEORM_SYNC=true` thành `false` trong `backend/.env`.
+  2. Đổi `TYPEORM_SYNC=true` thành `false` trong `backend/.env.example`.
+  3. Cập nhật `SETUP.md` ở phần biến môi trường và phần gỡ lỗi thường gặp, chuyển hướng dẫn từ việc bật `TYPEORM_SYNC` sang sử dụng lệnh Migration.
+- **Lý do:** Người dùng phát hiện biến `TYPEORM_SYNC` vẫn còn bật (`true`). Nếu để `true`, quá trình chạy server có thể gây xung đột với các thao tác của TypeORM Migration.
+- **Mục đích:** Tách biệt hoàn toàn nhiệm vụ tạo/sửa bảng (do Migration đảm nhiệm) khỏi quá trình chạy app (chỉ thực thi logic).
+- **Lợi ích:** Tránh lỗi ghi đè cấu trúc bảng, bảo vệ dữ liệu an toàn.
+- **Thông tin cần lưu ý & Thông số kỹ thuật:**
+  - Từ thời điểm này, toàn bộ việc thay đổi cấu trúc database PHẢI thông qua các file trong `src/migrations`. Việc chạy lại server bằng `npm run start:dev` sẽ không tác động đến DB nữa.
+
+## Bật lại TYPEORM_SYNC cho MVP và Cập nhật định hướng - 2026-08-31
+- **Ngày giờ thực hiện:** 2026-08-31 23:04:00
+- **Các công việc đã thực hiện:**
+  1. Đổi lại `TYPEORM_SYNC=true` trong `backend/.env` và `backend/.env.example`.
+  2. Khôi phục lại tài liệu `SETUP.md`: bỏ bước chạy `npm run migration:run`, giữ nguyên hướng dẫn chạy thẳng `npm run start:dev` để tiện dụng.
+  3. Bổ sung ghi chú vào `docs/Future_Development.md` mục "1. Hạ tầng & Triển khai" về việc bắt buộc phải chuyển sang dùng TypeORM Migration (TYPEORM_SYNC=false) khi phát triển mở rộng hoặc đưa lên Production.
+- **Lý do:** Người dùng muốn ưu tiên sự tiện dụng tối đa cho người cài đặt MVP (chỉ cần chạy 1 lệnh là xong), đồng thời vẫn lưu ý rủi ro cho tương lai.
+- **Mục đích:** Cân bằng giữa sự tiện lợi của MVP và chuẩn mực kỹ thuật của Production.
+- **Lợi ích:** Trải nghiệm cài đặt Local/Demo mượt mà hơn.
+- **Thông tin cần lưu ý & Thông số kỹ thuật:**
+  - Đối với bản MVP hiện tại: Mọi người chỉ cần chạy `npm run start:dev` là tự có bảng nhờ phép thuật của `TYPEORM_SYNC=true`.
+  - Hướng dẫn dùng Migration đã được chuyển vào `docs/Future_Development.md` để dọn đường cho phase sau.
+
+## Bổ sung hướng dẫn Seed Data vào SETUP.md - 2026-08-31
+- **Ngày giờ thực hiện:** 2026-08-31 23:20:00
+- **Các công việc đã thực hiện:**
+  1. Thêm Bước 2.6 (Nạp dữ liệu mẫu - Seed Data) vào file `SETUP.md`.
+  2. Ghi rõ lưu ý chỉ chạy lệnh `npm run seed` sau khi đã khởi động server (để đảm bảo bảng đã được TypeORM tạo).
+- **Lý do:** Người dùng yêu cầu bổ sung lệnh nạp dữ liệu mẫu vào tài liệu cài đặt chung.
+- **Mục đích:** Giúp các dev sau hoặc người xem demo nhanh chóng có môi trường đầy đủ dữ liệu (Users, Merchants, Vouchers) mà không cần tạo bằng tay.
+- **Lợi ích:** Tiết kiệm thời gian test và đảm bảo app hiển thị đầy đủ UI ngay lần mở đầu tiên.
+- **Thông tin cần lưu ý & Thông số kỹ thuật:**
+  - Lệnh seed chỉ dành cho môi trường dev/demo. Cấm dùng cho Production.
+
+## Sửa lỗi TypeORM khi chạy Seed Data - 2026-08-31
+- **Ngày giờ thực hiện:** 2026-08-31 23:22:00
+- **Các công việc đã thực hiện:**
+  1. Cập nhật `backend/src/seeds/seed.ts`.
+  2. Thay thế lệnh `repository.delete({})` bằng `repository.createQueryBuilder().delete().execute()`.
+- **Lý do:** Các phiên bản TypeORM mới có cơ chế an toàn ngăn chặn việc dùng lệnh `.delete({})` (Empty criteria) để xóa toàn bộ dữ liệu trong bảng, gây ra lỗi khi người dùng cố gắng nạp dữ liệu mẫu.
+- **Mục đích:** Đảm bảo script seed data chạy thành công mà không bị crash.
+- **Lợi ích:** Fix triệt để bug khi clear database trước khi seed.
+- **Thông tin cần lưu ý & Thông số kỹ thuật:**
+  - Lỗi gặp phải: `TypeORMError: Empty criteria(s) are not allowed for the delete method`.
+
+## Bổ sung cảnh báo an toàn cho lệnh Seed - 2026-08-31
+- **Ngày giờ thực hiện:** 2026-08-31 23:24:00
+- **Các công việc đã thực hiện:** Cập nhật file `SETUP.md` (Bước 2.6) bổ sung dòng cảnh báo in đậm rằng lệnh `npm run seed` sẽ xóa sạch toàn bộ dữ liệu cũ.
+- **Lý do:** Người dùng yêu cầu ghi chú rõ ràng để các dev khác không bị mất dữ liệu oan uổng.
+- **Mục đích:** Tăng cường cảnh báo rủi ro về mặt an toàn dữ liệu.
+- **Lợi ích:** Tránh thảm họa xóa nhầm dữ liệu test quan trọng khi ai đó vô tình chạy lại lệnh seed.
+
+## Đánh dấu hoàn thành toàn bộ Task 1.2 - 2026-08-31
+- **Ngày giờ thực hiện:** 2026-08-31 23:29:00
+- **Các công việc đã thực hiện:** Kiểm tra và đánh dấu `[x]` cho mục "Viết script seed data" trong `docs/task_tracker.md`.
+- **Lý do:** Người dùng yêu cầu kiểm tra xem còn sót mục nào trong Task 1.2 chưa tick hoàn thành không trước khi push code.
+- **Mục đích:** Đảm bảo Task Tracker phản ánh chính xác trạng thái thực tế.
+- **Lợi ích:** Đóng lại một chặng của dự án, chuyển sang Task 1.3 với tài liệu gọn gàng.
+- **Thông tin cần lưu ý & Thông số kỹ thuật:**
+  - Task 1.2 (Thiết kế Database Schema & Seed Data) đã hoàn thành 100%.
+
+## Cập nhật hệ thống - 2026-08-31
+- **Ngày giờ thực hiện:** 2026-08-31 23:17:00
+- **Các công việc đã thực hiện:**
+  1. Cập nhật file `docs/DEVELOPER_GUIDE.md`: Bổ sung thông tin tài khoản đăng nhập pgAdmin (`admin@tingting.dev` / `admin123`) và chuỗi kết nối PostgreSQL (`postgresql://postgres:123456@localhost:5432/tingting_db`) vào phần hướng dẫn khởi chạy Docker.
+- **Lý do:** Giúp các lập trình viên dễ dàng tra cứu thông tin đăng nhập giao diện pgAdmin và DB trực tiếp từ tài liệu hướng dẫn mà không cần phải mở xem nội dung file `docker-compose.yml` hay `.env`.

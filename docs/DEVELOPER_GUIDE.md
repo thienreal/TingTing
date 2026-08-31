@@ -147,6 +147,12 @@ npm run lint -- --fix
 ### Docker — chạy trong thư mục gốc `TingTing/`
 
 > Yêu cầu: Đã cài Docker Desktop.
+> 
+> **Thông tin đăng nhập sau khi khởi chạy:**
+> - **pgAdmin Web UI**: Truy cập [http://localhost:5050](http://localhost:5050)
+>   - Email: `admin@tingting.dev`
+>   - Mật khẩu: `admin123`
+> - **PostgreSQL**: `postgresql://postgres:123456@localhost:5432/tingting_db`
 
 ```bash
 # Khởi động PostgreSQL + pgAdmin (chạy ngầm)
