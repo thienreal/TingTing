@@ -11,34 +11,40 @@
  *   - TypeORM
  *
  * @todo
- *   - 
+ *   -
  */
 
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
-import { Transaction } from '../../transactions/entities/transaction.entity';
-import { Voucher } from '../../vouchers/entities/voucher.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  OneToMany,
+} from "typeorm";
+import { Transaction } from "../../transactions/entities/transaction.entity";
+import { Voucher } from "../../vouchers/entities/voucher.entity";
 
-@Entity('merchants')
+@Entity("merchants")
 export class Merchant {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ type: 'varchar', length: 150 })
+  @Column({ type: "varchar", length: 150 })
   name: string;
 
-  @Column({ type: 'varchar', length: 100, unique: true })
+  @Column({ type: "varchar", length: 100, unique: true })
   email: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: "varchar", length: 255 })
   password: string; // Hashed password
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
+  @Column({ type: "varchar", length: 100, nullable: true })
   category: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({ type: "varchar", length: 255, nullable: true })
   qr_static_code: string;
 
-  @Column({ type: 'boolean', default: true })
+  @Column({ type: "boolean", default: true })
   is_active: boolean;
 
   @CreateDateColumn()

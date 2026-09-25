@@ -11,28 +11,34 @@
  *   - TypeORM
  *
  * @todo
- *   - 
+ *   -
  */
 
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
-import { Transaction } from '../../transactions/entities/transaction.entity';
-import { UserVoucher } from '../../user-vouchers/entities/user-voucher.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  OneToMany,
+} from "typeorm";
+import { Transaction } from "../../transactions/entities/transaction.entity";
+import { UserVoucher } from "../../user-vouchers/entities/user-voucher.entity";
 
-@Entity('users')
+@Entity("users")
 export class User {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ type: 'varchar', length: 20, unique: true })
+  @Column({ type: "varchar", length: 20, unique: true })
   phone_number: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
+  @Column({ type: "varchar", length: 100, nullable: true })
   full_name: string;
 
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: "int", default: 0 })
   total_points: number;
 
-  @Column({ type: 'varchar', length: 50, default: 'STANDARD' })
+  @Column({ type: "varchar", length: 50, default: "STANDARD" })
   membership_tier: string;
 
   @CreateDateColumn()

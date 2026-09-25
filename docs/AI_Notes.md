@@ -4,7 +4,135 @@
 
 ---
 
+### [2026-09-25 09:05:00] Hoàn thành Task 1.4 — Module Merchants (Báo cáo)
+
+- **Task:** 1.4 — Phát triển Backend API Cốt lõi — Module Merchants
+- **Các công việc đã thực hiện:**
+  1. Tạo `merchants/merchants.service.ts`: method `getReport(merchantId)` kết nối đến repository của `Transaction`, `Voucher`, `UserVoucher` để thống kê: `active_vouchers_count`, `total_points_issued` (loại EARN), `total_transactions`, và `used_vouchers_count`.
+  2. Tạo `merchants/merchants.controller.ts`: định tuyến `GET /merchants/me/report`, sử dụng `JwtAuthGuard` và role `MERCHANT`.
+  3. Tạo `merchants/merchants.module.ts`: cấu hình `TypeOrmModule` và `AuthModule`, export `MerchantsService`.
+  4. Đăng ký `MerchantsModule` vào `app.module.ts`.
+  5. Cập nhật `docs/task_tracker.md` đánh dấu hoàn tất toàn bộ Task 1.4.
+  6. Chạy `npm run build` thành công, không lỗi.
+- **Lý do:** Hoàn thành chặng 4, cũng là chặng cuối của Task 1.4 (Phát triển Backend API Cốt lõi).
+- **Thông số kỹ thuật:**
+  - Logic tính tổng bằng QueryBuilder cho `total_points_issued` (SUM `points_delta`) và count join bảng cho `used_vouchers_count`.
+
+---
+
+### [2026-09-25 08:49:00] Hoàn thành Task 1.4 — Module Vouchers
+
+
+- **Task:** 1.4 — Phát triển Backend API Cốt lõi — Module Vouchers
+- **Các công việc đã thực hiện:**
+  1. Tạo `vouchers/dto/create-voucher.dto.ts`: Validate title, description (optional), points_cost, total_quantity, expired_at (ISO 8601).
+  2. Tạo `vouchers/dto/use-voucher.dto.ts`: Validate user_voucher_id UUID.
+  3. Tạo `vouchers/vouchers.service.ts` với 5 methods:
+     - `findAll()`: Query voucher `remaining_quantity > 0`, kèm relation merchant, sort `points_cost ASC`.
+     - `findOne(id)`: Tìm theo UUID, throw 404 nếu không có.
+     - `findMyVouchers(userId)`: Query UserVoucher kèm `voucher.merchant`, sort `created_at DESC`.
+     - `createVoucher(merchantId, dto)`: Xác thực merchant active, khởi tạo `remaining_quantity = total_quantity`.
+     - `redeemVoucher(voucherId, userId)`: **Double Row-Level Lock** — Lock Voucher + Lock User đồng thời trong 1 QueryRunner Transaction. Kiểm tra: còn hạn → còn tồn kho → chưa đổi → đủ điểm → Giảm `remaining_quantity` → Trừ `total_points` → Tạo `UserVoucher(ACTIVE)` → COMMIT. Rollback khi lỗi.
+     - `useVoucher(merchantId, dto)`: Tìm UserVoucher, kiểm tra **ownership** (`voucher.merchant_id === merchantId`), kiểm tra status ACTIVE, kiểm tra `expired_at`, chuyển ACTIVE → USED.
+  4. Tạo `vouchers/vouchers.controller.ts`: 6 endpoints. `GET /vouchers/mine` khai báo **TRƯỚC** `GET /vouchers/:id` để tránh "mine" bị parse thành UUID param. `ParseUUIDPipe` validate tự động param `:id`.
+  5. Tạo `vouchers/vouchers.module.ts`: Import `AuthModule`, 4 entities.
+  6. Cập nhật `app.module.ts`: Import `VouchersModule`.
+  7. Cập nhật `docs/task_tracker.md`: Tick `[x]` 5 tasks Vouchers.
+  8. Chạy `npm run build` → Exit code 0, không có lỗi TypeScript.
+- **Lý do:** Hoàn thành chặng 3 của Task 1.4 (Vouchers API — module phức tạp nhất).
+- **Thông số kỹ thuật:**
+  - Double-spending protection: 2 `SELECT FOR UPDATE` trong cùng 1 `QueryRunner` transaction — Voucher lock trước, User lock sau.
+  - Ownership check trong `useVoucher`: so sánh `userVoucher.voucher.merchant_id !== merchantId` → throw 403.
+  - Route order: `/vouchers/mine` phải đặt trước `/vouchers/:id` trong NestJS để tránh xung đột routing.
+  - `MoreThan(0)` từ TypeORM dùng cho filter `remaining_quantity > 0`.
+  - Cấu trúc: `backend/src/modules/vouchers/{dto/,entities/,vouchers.service.ts,vouchers.controller.ts,vouchers.module.ts}`.
+
+---
+
+### [2026-09-25 08:40:00] Hoàn thành Task 1.4 — Module Users & Points
+
+
+- **Task:** 1.4 — Phát triển Backend API Cốt lõi — Module Users & Points
+- **Các công việc đã thực hiện:**
+  1. Tạo `users/dto/earn-points.dto.ts`: Validate `user_id` (UUID v4) + `bill_amount` (số dương, tối thiểu 1.000đ).
+  2. Tạo `users/users.service.ts` với 4 methods:
+     - `getMe()`: Tìm user theo userId từ JWT, throw 404 nếu không có.
+     - `getMyTransactions()`: Query lịch sử transaction kèm relation `merchant`, ORDER BY `created_at DESC`.
+     - `getPointsBalance()`: Trả `total_points` và `membership_tier`, chỉ SELECT 2 cột cần thiết.
+     - `earnPoints()`: **Row-Level Lock** (`SELECT FOR UPDATE` qua TypeORM `pessimistic_write`). Tính điểm = `floor(bill_amount / POINTS_RATIO)`. Tự động tính lại `membership_tier` bằng so sánh ngưỡng từ `MEMBERSHIP_TIERS_CONFIG` (parse JSON từ .env). Lưu Transaction record. Rollback nếu lỗi, luôn release QueryRunner.
+  3. Tạo `users/users.controller.ts`: 4 endpoints với RBAC đúng role (USER/MERCHANT), `@CurrentUser()` decorator.
+  4. Tạo `users/users.module.ts`: Import `AuthModule` (dùng guards), `TypeOrmModule.forFeature([User, Transaction, Merchant])`.
+  5. Cập nhật `app.module.ts`: Import `UsersModule`.
+  6. Cập nhật `docs/task_tracker.md`: Tick `[x]` 3 tasks Users & Points.
+  7. Chạy `npm run build` → Exit code 0, không có lỗi TypeScript.
+- **Lý do:** Hoàn thành chặng 2 của Task 1.4 (Users & Points API).
+- **Thông số kỹ thuật:**
+  - `POINTS_RATIO`: đọc từ `.env` (hiện = 1000 → 1.000đ = 1 điểm), parse `parseInt`.
+  - `MEMBERSHIP_TIERS_CONFIG`: JSON string từ `.env` → parse → sort giảm dần → so sánh từ tier cao nhất.
+  - Row-Level Lock: `queryRunner.manager.findOne(User, { lock: { mode: 'pessimistic_write' } })`.
+  - QueryRunner: `createQueryRunner()` → `connect()` → `startTransaction()` → `commitTransaction()` / `rollbackTransaction()` → `release()`.
+  - Cấu trúc: `backend/src/modules/users/{dto/,entities/,users.service.ts,users.controller.ts,users.module.ts}`.
+
+---
+
+### [2026-09-25 08:17:00] Hoàn thành Task 1.4 — Module Auth (RBAC, OTP, JWT)
+
+
+- **Task:** 1.4 — Phát triển Backend API Cốt lõi — Module Auth
+- **Các công việc đã thực hiện:**
+  1. Tạo `auth/dto/send-otp.dto.ts`: Validate số điện thoại VN (regex `0[3|5|7|8|9]xxxxxxxx`).
+  2. Tạo `auth/dto/verify-otp.dto.ts`: Validate phone + OTP 6 chữ số. Comment `@mvp` và `@future` rõ ràng chỉ tới `Future_Development.md §1`.
+  3. Tạo `auth/dto/merchant-login.dto.ts`: Validate email + password minLength 6.
+  4. Tạo `auth/strategies/jwt.strategy.ts`: Passport JWT Strategy, đọc `JWT_SECRET` từ ConfigService (không hardcode). Export interface `JwtPayload`.
+  5. Tạo `auth/guards/jwt-auth.guard.ts`: Wrapper mỏng trên `AuthGuard('jwt')`.
+  6. Tạo `auth/guards/roles.guard.ts`: Đọc metadata `ROLES_KEY`, so sánh `req.user.role`, throw `ForbiddenException` 403 nếu không đủ quyền.
+  7. Tạo `auth/decorators/roles.decorator.ts`: `@Roles('USER' | 'MERCHANT')` dùng `SetMetadata`.
+  8. Tạo `auth/decorators/current-user.decorator.ts`: `@CurrentUser()` extract `req.user` từ param.
+  9. Tạo `auth/auth.service.ts`: 3 methods: `sendOtp` (Mock OTP `000000` + log WARN + comment @future chi tiết), `verifyOtp` (kiểm tra mock + auto-register User + ký JWT), `merchantLogin` (bcrypt so sánh hash + ký JWT). Hằng số `MOCK_OTP_CODE` được đặt riêng và có comment đầy đủ.
+  10. Tạo `auth/auth.controller.ts`: 3 POST endpoints, `@HttpCode(200)`.
+  11. Tạo `auth/auth.module.ts`: `JwtModule.registerAsync` đọc secret từ ConfigService, export guards cho các module khác.
+  12. Cập nhật `app.module.ts`: Import `AuthModule`.
+  13. Cập nhật `main.ts`: Bật `ValidationPipe` global (`whitelist: true`, `forbidNonWhitelisted: true`, `transform: true`).
+  14. Cập nhật `docs/Future_Development.md §1`: Bổ sung sub-list 5 điểm chi tiết về vị trí chính xác trong code cần sửa khi tích hợp SMS OTP thật.
+  15. Cập nhật `docs/task_tracker.md`: Tick `[x]` 4 tasks Auth.
+  16. Chạy `npm run build` → Exit code 0, không có lỗi TypeScript.
+- **Lý do:** Hoàn thành chặng 1 của Task 1.4 theo kế hoạch chia nhỏ đã thảo luận.
+- **Thông số kỹ thuật:**
+  - Mock OTP: hằng số `MOCK_OTP_CODE = '000000'` trong `auth.service.ts`, lưu trong `Map<string, string>` in-memory.
+  - JWT payload: `{ sub: uuid, role: 'USER'|'MERCHANT', phone?: string, email?: string }`.
+  - JWT secret/expiry: đọc từ `JWT_SECRET`, `JWT_EXPIRES_IN` trong `.env` (hiện: `tingting_dev_secret_key_2026`, `7d`).
+  - Password hash: bcrypt (so sánh với `merchant.password` đã hash sẵn trong seed).
+  - RBAC: `@Roles('MERCHANT') + @UseGuards(JwtAuthGuard, RolesGuard)` pattern.
+  - Cấu trúc: `backend/src/modules/auth/{dto,strategies,guards,decorators}/`.
+
+---
+
+### [2026-09-25 08:02:00] Hoàn thành Task 1.3 — Xây dựng UI Components cơ sở
+
+
+- **Task:** 1.3 — Thiết kế UI/UX (Wireframe & Component cơ sở)
+- **Các công việc đã thực hiện:**
+  1. Đọc và phân tích `agent.md`, `docs/UI_Design_Rules.md`, `docs/CODE_STANDARDS.md`, `docs/CROSS_CHECK.md`.
+  2. Xem các ảnh thiết kế mẫu trong `anh/` để nắm phong cách Vàng/Hồng, card bo góc, BottomNavBar 4 tab.
+  3. Tạo `app_user/lib/widgets/primary_button.dart`: Nút CTA màu Hồng (#E8687D), bo góc 12px, full-width, hỗ trợ prefixIcon và trạng thái disabled.
+  4. Tạo `app_user/lib/widgets/voucher_card.dart`: Card trắng bo góc 16px, shadow 0.05 opacity, thumbnail (network/placeholder gradient), merchant name, title, points badge icon đồng xu vàng. Kèm data class `VoucherCardData`.
+  5. Tạo `app_user/lib/widgets/bottom_nav_bar.dart`: BottomNavBar 4 tab (Trang chủ, Tích điểm, Đổi thưởng, Tài khoản). Active: icon filled + text bold #1A1A1A. Inactive: icon outline + text #757575. Enum `AppTab`.
+  6. Tạo `app_merchant/lib/widgets/action_button.dart`: Nút Merchant màu Vàng (#FAD240) variant `filled`, viền Hồng (#E8687D) variant `outlined`. Enum `ActionButtonVariant`.
+  7. Tạo `app_merchant/lib/widgets/transaction_tile.dart`: Tile giao dịch, icon phân loại, delta điểm xanh lá (+) / đỏ san hô (-), format giờ phút & VND. Data class `TransactionTileData`, enum `TransactionType`.
+  8. Cập nhật `docs/task_tracker.md`: tick [x] cho toàn bộ task 1.3.
+- **Lý do:** Task 1.3 yêu cầu xây dựng component UI cơ sở trước khi phát triển màn hình hoàn chỉnh ở task 1.6 và 1.7.
+- **Thông số kỹ thuật:**
+  - Màu sắc: tất cả từ `AppColors` (theme.dart), không hardcode.
+  - Radius: Card 16px, Button & Tile 12px.
+  - BoxShadow: `Colors.black.withOpacity(0.05)`, blurRadius 10, offset (0,4).
+  - Font: Bold 700 (tiêu đề), SemiBold 600 (nút), Regular 400 (body).
+  - Thư mục mới: `app_user/lib/widgets/`, `app_merchant/lib/widgets/`.
+  - Header DartDoc đầy đủ theo chuẩn `CODE_STANDARDS.md`.
+
+---
+
 ### [2026-08-29 21:33:00] Khởi tạo tài liệu quy tắc và hệ thống lưu vết
+
 - **Các công việc đã thực hiện:** 
   1. Tạo file `agent.md` để quy định phong cách thiết kế UI/UX dựa trên app mẫu.
   2. Tạo file `AI_Notes.md` để ghi nhận toàn bộ lịch sử làm việc của AI.

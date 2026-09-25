@@ -7,16 +7,19 @@
  *   - Tạo 10 Merchant, 20 User, 30 Voucher, 50 Transaction
  */
 
-import { DataSource } from 'typeorm';
-import { User } from '../modules/users/entities/user.entity';
-import { Merchant } from '../modules/merchants/entities/merchant.entity';
-import { Transaction, TransactionType } from '../modules/transactions/entities/transaction.entity';
-import { Voucher } from '../modules/vouchers/entities/voucher.entity';
-import { UserVoucher, UserVoucherStatus } from '../modules/user-vouchers/entities/user-voucher.entity';
-import * as bcrypt from 'bcrypt';
+import { DataSource } from "typeorm";
+import { User } from "../modules/users/entities/user.entity";
+import { Merchant } from "../modules/merchants/entities/merchant.entity";
+import {
+  Transaction,
+  TransactionType,
+} from "../modules/transactions/entities/transaction.entity";
+import { Voucher } from "../modules/vouchers/entities/voucher.entity";
+import { UserVoucher } from "../modules/user-vouchers/entities/user-voucher.entity";
+import * as bcrypt from "bcrypt";
 
 export async function runSeed(dataSource: DataSource) {
-  console.log('Bắt đầu sinh dữ liệu mẫu (Seed Data)...');
+  console.log("Bắt đầu sinh dữ liệu mẫu (Seed Data)...");
 
   const userRepository = dataSource.getRepository(User);
   const merchantRepository = dataSource.getRepository(Merchant);
@@ -33,16 +36,16 @@ export async function runSeed(dataSource: DataSource) {
 
   // Sinh 10 Merchant
   const merchantsData = [];
-  const passwordHash = await bcrypt.hash('123456', 10);
+  const passwordHash = await bcrypt.hash("123456", 10);
   for (let i = 1; i <= 10; i++) {
     merchantsData.push(
       merchantRepository.create({
         name: `Cửa hàng Mẫu ${i}`,
         email: `merchant${i}@tingting.dev`,
         password: passwordHash,
-        category: i % 2 === 0 ? 'F&B' : 'Bán lẻ',
+        category: i % 2 === 0 ? "F&B" : "Bán lẻ",
         qr_static_code: `QR_MERCHANT_${i}`,
-      })
+      }),
     );
   }
   const merchants = await merchantRepository.save(merchantsData);
@@ -52,11 +55,11 @@ export async function runSeed(dataSource: DataSource) {
   for (let i = 1; i <= 20; i++) {
     usersData.push(
       userRepository.create({
-        phone_number: `0900000${i < 10 ? '0' + i : i}`,
+        phone_number: `0900000${i < 10 ? "0" + i : i}`,
         full_name: `Người Dùng ${i}`,
         total_points: 1000 + i * 100, // Đa dạng điểm số
-        membership_tier: i % 3 === 0 ? 'GOLD' : 'STANDARD',
-      })
+        membership_tier: i % 3 === 0 ? "GOLD" : "STANDARD",
+      }),
     );
   }
   const users = await userRepository.save(usersData);
@@ -74,10 +77,10 @@ export async function runSeed(dataSource: DataSource) {
         total_quantity: 100,
         remaining_quantity: 90,
         expired_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Hết hạn sau 30 ngày
-      })
+      }),
     );
   }
-  const vouchers = await voucherRepository.save(vouchersData);
+  await voucherRepository.save(vouchersData);
 
   // Sinh 50 Transaction
   const transactionsData = [];
@@ -91,10 +94,10 @@ export async function runSeed(dataSource: DataSource) {
         type: TransactionType.EARN,
         points_delta: 50,
         bill_amount: 50000,
-      })
+      }),
     );
   }
   await transactionRepository.save(transactionsData);
 
-  console.log('Sinh dữ liệu mẫu thành công!');
+  console.log("Sinh dữ liệu mẫu thành công!");
 }

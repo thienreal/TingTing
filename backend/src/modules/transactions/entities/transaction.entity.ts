@@ -10,43 +10,50 @@
  *   - TypeORM
  */
 
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
-import { Merchant } from '../../merchants/entities/merchant.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from "typeorm";
+import { User } from "../../users/entities/user.entity";
+import { Merchant } from "../../merchants/entities/merchant.entity";
 
 export enum TransactionType {
-  EARN = 'EARN',
-  REDEEM = 'REDEEM',
+  EARN = "EARN",
+  REDEEM = "REDEEM",
 }
 
-@Entity('transactions')
+@Entity("transactions")
 export class Transaction {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: "uuid" })
   user_id: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: "uuid" })
   merchant_id: string;
 
-  @Column({ type: 'enum', enum: TransactionType })
+  @Column({ type: "enum", enum: TransactionType })
   type: TransactionType;
 
-  @Column({ type: 'int' })
+  @Column({ type: "int" })
   points_delta: number;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true })
+  @Column({ type: "decimal", precision: 12, scale: 2, nullable: true })
   bill_amount: number;
 
   @CreateDateColumn()
   created_at: Date;
 
   @ManyToOne(() => User, (user) => user.transactions)
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: "user_id" })
   user: User;
 
   @ManyToOne(() => Merchant, (merchant) => merchant.transactions)
-  @JoinColumn({ name: 'merchant_id' })
+  @JoinColumn({ name: "merchant_id" })
   merchant: Merchant;
 }

@@ -1,5 +1,5 @@
-import { AppDataSource } from '../config/database.config';
-import { runSeed } from './seed';
+import { AppDataSource } from "../config/database.config";
+import { runSeed } from "./seed";
 
 AppDataSource.initialize()
   .then(async (dataSource) => {
@@ -7,6 +7,6 @@ AppDataSource.initialize()
     process.exit(0);
   })
   .catch((error) => {
-    console.error('Lỗi khi chạy seed:', error);
+    console.error("Lỗi khi chạy seed:", error);
     process.exit(1);
   });

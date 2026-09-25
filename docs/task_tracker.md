@@ -51,33 +51,33 @@
 
 ### 1.3 Thiết kế UI/UX (Wireframe & Component cơ sở)
 
-- [ ] `app_user`: Xây dựng `PrimaryButton`, `VoucherCard` (bo góc 16px), `BottomNavBar` (4 tab).
-- [ ] `app_merchant`: Xây dựng `ActionButton`, `TransactionTile`.
+- [x] `app_user`: Xây dựng `PrimaryButton`, `VoucherCard` (bo góc 16px), `BottomNavBar` (4 tab).
+- [x] `app_merchant`: Xây dựng `ActionButton`, `TransactionTile`.
 
 ---
 
 ### 1.4 Phát triển Backend API Cốt lõi
 
 **Module: Auth**
-- [ ] API `POST /auth/send-otp`: Nhận `phone_number`, sinh Mock OTP (cố định là `000000` cho MVP).
-- [ ] API `POST /auth/verify-otp`: Kiểm tra OTP giả lập, trả về JWT Access Token.
-- [ ] API `POST /auth/merchant/login`: Đăng nhập Merchant (email/password).
-- [ ] Thiết lập RBAC (Role-Based Access Control).
+- [x] API `POST /auth/send-otp`: Nhận `phone_number`, sinh Mock OTP (cố định là `000000` cho MVP).
+- [x] API `POST /auth/verify-otp`: Kiểm tra OTP giả lập, trả về JWT Access Token.
+- [x] API `POST /auth/merchant/login`: Đăng nhập Merchant (email/password).
+- [x] Thiết lập RBAC (Role-Based Access Control).
 
 **Module: Users & Points**
-- [ ] API `GET /users/me` và `GET /users/me/transactions`.
-- [ ] API `POST /points/earn` (Merchant only): Cộng điểm theo `POINTS_RATIO` (đọc từ config), cập nhật `membership_tier` nếu vượt ngưỡng, dùng **Row-Level Lock** trên table Users.
-- [ ] API `GET /points/balance`.
+- [x] API `GET /users/me` và `GET /users/me/transactions`.
+- [x] API `POST /points/earn` (Merchant only): Cộng điểm theo `POINTS_RATIO` (đọc từ config), cập nhật `membership_tier` nếu vượt ngưỡng, dùng **Row-Level Lock** trên table Users.
+- [x] API `GET /points/balance`.
 
 **Module: Vouchers**
-- [ ] API `GET /vouchers` và `GET /vouchers/:id`.
-- [ ] API `POST /vouchers/:id/redeem` (User only): Dùng **PostgreSQL Transaction + Row-Level Lock** chống double-spending (Kiểm tra điểm đủ -> Giảm tồn kho -> Trừ điểm -> Tạo UserVoucher).
-- [ ] API `GET /vouchers/mine`: Trả danh sách voucher của user.
-- [ ] API `POST /merchants/vouchers` (Merchant only): Tạo Voucher mới (truyền tham số `points_cost` để thiết lập hạng mức đổi).
-- [ ] API `POST /points/use-voucher` (Merchant only): Quét barcode voucher để chuyển trạng thái `USED`.
+- [x] API `GET /vouchers` và `GET /vouchers/:id`.
+- [x] API `POST /vouchers/:id/redeem` (User only): Dùng **PostgreSQL Transaction + Row-Level Lock** chống double-spending (Kiểm tra điểm đủ -> Giảm tồn kho -> Trừ điểm -> Tạo UserVoucher).
+- [x] API `GET /vouchers/mine`: Trả danh sách voucher của user.
+- [x] API `POST /merchants/vouchers` (Merchant only): Tạo Voucher mới (truyền tham số `points_cost` để thiết lập hạng mức đổi).
+- [x] API `POST /points/use-voucher` (Merchant only): Quét barcode voucher để chuyển trạng thái `USED`.
 
 **Module: Merchants (Báo cáo)**
-- [ ] API `GET /merchants/me/report`: Thống kê giao dịch, voucher.
+- [x] API `GET /merchants/me/report`: Thống kê giao dịch, voucher.
 
 ---
 
