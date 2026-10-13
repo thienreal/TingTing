@@ -81,6 +81,7 @@ Dự án đề cao tính linh hoạt. Các tham số nghiệp vụ quan trọng 
 | Theme Flutter (Merchant) | `app_merchant/lib/core/theme.dart` | Tương tự |
 | API Client (User) | `app_user/lib/core/api_client.dart` | Base URL kết nối tới Backend |
 | API Client (Merchant) | `app_merchant/lib/core/api_client.dart` | Tương tự |
+| WebSocket Client (User) | `app_user/lib/core/socket_client.dart` | Quản lý kết nối Socket.IO real-time (Task 1.5) |
 | Quy tắc UI/UX | `docs/UI_Design_Rules.md` | Thông số màu, font, border radius chính xác |
 | Theo dõi task | `docs/task_tracker.md` | Cập nhật khi hoàn thành một task |
 

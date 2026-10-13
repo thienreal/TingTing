@@ -8,6 +8,7 @@ import { AuthModule } from "./modules/auth/auth.module";
 import { UsersModule } from "./modules/users/users.module";
 import { VouchersModule } from "./modules/vouchers/vouchers.module";
 import { MerchantsModule } from "./modules/merchants/merchants.module";
+import { NotificationsModule } from "./modules/notifications/notifications.module";
 
 @Module({
   imports: [
@@ -22,8 +23,10 @@ import { MerchantsModule } from "./modules/merchants/merchants.module";
     UsersModule, // Users & Points: profile, lịch sử giao dịch, cộng điểm, số dư
     VouchersModule, // Vouchers: danh sách, đổi điểm (chống double-spending), tạo, dùng
     MerchantsModule, // Merchants: thông tin, báo cáo thống kê giao dịch/voucher
+    NotificationsModule, // WebSocket Gateway: real-time notification (Task 1.5)
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
+

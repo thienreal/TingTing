@@ -10,14 +10,15 @@
  *     + Tính điểm theo POINTS_RATIO từ biến môi trường
  *     + Cập nhật membership_tier nếu vượt ngưỡng
  *     + Dùng PostgreSQL Row-Level Lock (SELECT FOR UPDATE) chống race condition
+ *     + Phát sự kiện WebSocket `points_earned` real-time sau commit (Task 1.5)
  *
  * @dependencies
  *   - TypeORM (DataSource, Repository)
  *   - ConfigService (đọc POINTS_RATIO, MEMBERSHIP_TIERS_CONFIG từ .env)
+ *   - NotificationsGateway (phát real-time notification qua Socket.IO)
  *
  * @todo
  *   - [ ] Cache GET /users/me bằng Redis để giảm tải DB khi nhiều user đồng thời
- *   - [ ] Phát sự kiện WebSocket khi cộng điểm thành công (Task 1.5)
  */
 
 import {
@@ -37,6 +38,10 @@ import {
 } from "../transactions/entities/transaction.entity";
 import { Merchant } from "../merchants/entities/merchant.entity";
 import { EarnPointsDto } from "./dto/earn-points.dto";
+import {
+  NotificationsGateway,
+} from "../notifications/notifications.gateway";
+
 
 // ==========================================
 // KIỂU DỮ LIỆU HỖ TRỢ
@@ -78,6 +83,9 @@ export class UsersService {
     private readonly dataSource: DataSource,
 
     private readonly configService: ConfigService,
+
+    // NotificationsGateway để phát real-time event khi cộng điểm thành công (Task 1.5)
+    private readonly notificationsGateway: NotificationsGateway,
   ) {
     // Đọc POINTS_RATIO từ .env, mặc định 1000 (1.000đ = 1 điểm)
     this.pointsRatio = parseInt(
@@ -295,12 +303,26 @@ export class UsersService {
           `(hóa đơn: ${bill_amount}đ | Merchant: ${merchantId})`,
       );
 
+      // ==========================================
+      // BƯỚC 7: PHÁT SỰ KIỆN WEBSOCKET (Task 1.5)
+      // Gọi NGOÀI transaction (sau commit) để không ảnh hưởng hiệu suất DB.
+      // Nếu user không online, Gateway sẽ bỏ qua mà không throw lỗi.
+      // ==========================================
+      this.notificationsGateway.notifyPointsEarned(user_id, {
+        points_earned: pointsEarned,
+        new_total_points: user.total_points,
+        new_membership_tier: newTier,
+        tier_upgraded: tierUpgraded,
+        merchant_name: merchant.name,
+      });
+
       return {
         points_earned: pointsEarned,
         new_total_points: user.total_points,
         new_membership_tier: newTier,
         tier_upgraded: tierUpgraded,
       };
+
     } catch (error) {
       // ==========================================
       // XỬ LÝ LỖI & ROLLBACK

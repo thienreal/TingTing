@@ -4,7 +4,30 @@
 
 ---
 
+### [2026-10-13 11:00:00] Hoàn thành Task 1.5 — Tích hợp WebSocket (Real-time Notification)
+
+- **Task:** 1.5 — Tích hợp WebSocket (Real-time Notification)
+- **Các công việc đã thực hiện:**
+  1. Tạo `backend/src/modules/notifications/notifications.gateway.ts`: Gateway Socket.IO port 3001, map `userId→socketId`, unicast `notifyPointsEarned()`, xử lý connect/disconnect.
+  2. Tạo `backend/src/modules/notifications/notifications.module.ts`: đóng gói và export Gateway.
+  3. Sửa `backend/src/modules/users/users.service.ts`: inject `NotificationsGateway`, gọi `notifyPointsEarned()` sau `commitTransaction()` (ngoài transaction để không ảnh hưởng atomicity DB), truyền `merchant_name` vào payload.
+  4. Sửa `backend/src/modules/users/users.module.ts`: import `NotificationsModule`.
+  5. Sửa `backend/src/app.module.ts`: import `NotificationsModule`.
+  6. Fix `backend/.env` và `backend/.env.example`: xóa khai báo duplicate `WEBSOCKET_PORT`, làm rõ comment.
+  7. Tạo `app_user/lib/core/socket_client.dart`: Singleton `SocketClient`, `connect(userId)`, `onPointsEarned(callback)`, `disconnect()`, class `PointsEarnedData`.
+  8. Sửa `app_user/pubspec.yaml`: thêm `socket_io_client: ^3.0.2`.
+  9. Sửa `app_user/lib/main.dart`: màn hình demo `WsTestScreen` — nhập userId, kết nối socket, hiển thị SnackBar khi nhận event `points_earned`.
+  10. Cập nhật `docs/DEVELOPER_GUIDE.md` Mục 4: thêm `socket_client.dart`.
+- **Lý do:** Hoàn thành Task 1.5 — kích hoạt luồng real-time Merchant cộng điểm → User nhận SnackBar thông báo ngay lập tức.
+- **Thông số kỹ thuật:**
+  - WebSocket port: `3001` (riêng biệt với REST API port 3000, đọc từ `WEBSOCKET_PORT`).
+  - Pattern: Unicast — `Map<userId, socketId>` in-memory (đủ cho MVP single-server).
+  - Flutter: `socket_io_client ^3.0.2`, transports `['websocket', 'polling']`, reconnection 5 lần.
+
+---
+
 ### [2026-09-25 09:05:00] Hoàn thành Task 1.4 — Module Merchants (Báo cáo)
+
 
 - **Task:** 1.4 — Phát triển Backend API Cốt lõi — Module Merchants
 - **Các công việc đã thực hiện:**

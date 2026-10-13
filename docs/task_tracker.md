@@ -83,9 +83,10 @@
 
 ### 1.5 Tích hợp WebSocket (Real-time Notification)
 
-- [ ] Cài đặt `socket.io` trong backend, cấu hình `WEBSOCKET_PORT` (nếu cần).
-- [ ] Tích hợp phát sự kiện (emit) qua WebSocket khi gọi `POST /points/earn` thành công (Báo User có điểm).
-- [ ] Flutter `app_user`: Kết nối WebSocket, lắng nghe sự kiện để hiển thị thông báo.
+- [x] Cài đặt `socket.io` trong backend, cấu hình `WEBSOCKET_PORT` (nếu cần).
+- [x] Tích hợp phát sự kiện (emit) qua WebSocket khi gọi `POST /points/earn` thành công (Báo User có điểm).
+- [x] Flutter `app_user`: Kết nối WebSocket, lắng nghe sự kiện để hiển thị thông báo.
+
 
 ---
 
