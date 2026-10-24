@@ -92,4 +92,60 @@ export class MerchantsService {
       used_vouchers_count: usedVouchersCount,
     };
   }
+
+  // ==========================================
+  // API: GET /merchants/me/transactions
+  // ==========================================
+
+  /**
+   * Lấy danh sách 30 giao dịch gần nhất của cửa hàng kèm thông tin khách hàng.
+   *
+   * @param merchantId - UUID của Merchant (từ JWT)
+   * @returns Danh sách giao dịch mới nhất
+   */
+  async getTransactions(merchantId: string) {
+    const transactions = await this.transactionRepository.find({
+      where: { merchant_id: merchantId },
+      relations: ["user"],
+      order: { created_at: "DESC" },
+      take: 30,
+    });
+
+    return transactions.map((tx) => ({
+      id: tx.id,
+      user_id: tx.user_id,
+      user_name: tx.user?.full_name || "Khách hàng",
+      user_phone: tx.user?.phone_number
+        ? tx.user.phone_number.replace(/(\d{3})\d{4}(\d{3})/, "$1****$2")
+        : "090****000",
+      type: tx.type,
+      points_delta: tx.points_delta,
+      bill_amount: tx.bill_amount ? Number(tx.bill_amount) : 0,
+      created_at: tx.created_at,
+    }));
+  }
+
+  // ==========================================
+  // API: GET /merchants
+  // ==========================================
+
+  /**
+   * Lấy danh sách toàn bộ đối tác trong mạng lưới TingTing đang hoạt động.
+   *
+   * @returns Danh sách thương hiệu đối tác
+   */
+  async findAllActiveMerchants() {
+    const merchants = await this.merchantRepository.find({
+      where: { is_active: true },
+      order: { name: "ASC" },
+    });
+
+    return merchants.map((m) => ({
+      id: m.id,
+      name: m.name,
+      email: m.email,
+      category: m.category,
+      qr_static_code: m.qr_static_code,
+    }));
+  }
 }

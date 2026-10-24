@@ -23,6 +23,7 @@ import {
   IsDateString,
   MaxLength,
   IsOptional,
+  IsUUID,
 } from "class-validator";
 import { Type } from "class-transformer";
 
@@ -35,6 +36,14 @@ export class CreateVoucherDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  /**
+   * Đối tác áp dụng ưu đãi (áp dụng cho Deal liên kết kích cầu đối tác).
+   * Nếu để trống -> Áp dụng tại chính cửa hàng phát hành.
+   */
+  @IsOptional()
+  @IsUUID("4", { message: "ID đối tác liên kết phải đúng định dạng UUID" })
+  target_merchant_id?: string;
 
   /**
    * Số điểm cần để đổi voucher này.

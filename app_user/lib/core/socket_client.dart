@@ -16,6 +16,7 @@
 /// Todo:
 ///   - [ ] Tự động reconnect khi mất mạng
 ///   - [ ] Gửi JWT trong handshake auth thay vì emit join riêng (bảo mật hơn cho Production)
+library;
 
 // ignore_for_file: avoid_print
 import 'package:socket_io_client/socket_io_client.dart' as io;
@@ -49,6 +50,26 @@ class PointsEarnedData {
       newMembershipTier: json['new_membership_tier'] as String,
       tierUpgraded: json['tier_upgraded'] as bool,
       merchantName: json['merchant_name'] as String,
+    );
+  }
+}
+
+class VoucherUsedData {
+  final String userVoucherId;
+  final String voucherTitle;
+  final String merchantName;
+
+  const VoucherUsedData({
+    required this.userVoucherId,
+    required this.voucherTitle,
+    required this.merchantName,
+  });
+
+  factory VoucherUsedData.fromJson(Map<String, dynamic> json) {
+    return VoucherUsedData(
+      userVoucherId: json['user_voucher_id'] as String? ?? '',
+      voucherTitle: json['voucher_title'] as String? ?? 'Voucher Ưu Đãi',
+      merchantName: json['merchant_name'] as String? ?? 'Cửa hàng',
     );
   }
 }
@@ -147,6 +168,21 @@ class SocketClient {
         callback(data);
       } catch (e) {
         print('[WS] Lỗi parse points_earned payload: $e');
+      }
+    });
+  }
+
+  /// Đăng ký callback để nhận dữ liệu khi sự kiện `voucher_used` được phát.
+  void onVoucherUsed(void Function(VoucherUsedData data) callback) {
+    if (_socket == null) return;
+
+    _socket!.on('voucher_used', (rawData) {
+      try {
+        final json = Map<String, dynamic>.from(rawData as Map);
+        final data = VoucherUsedData.fromJson(json);
+        callback(data);
+      } catch (e) {
+        print('[WS] Lỗi parse voucher_used payload: $e');
       }
     });
   }

@@ -168,4 +168,37 @@ export class NotificationsGateway
         `(+${payload.points_earned} điểm, tổng: ${payload.new_total_points})`,
     );
   }
+
+  // ==========================================
+  // PHÁT SỰ KIỆN: voucher_used (gọi từ VouchersService)
+  // ==========================================
+
+  /**
+   * Phát sự kiện `voucher_used` đến đúng socket của User khi voucher được áp dụng tại quầy.
+   *
+   * @param userId  - UUID của user sở hữu voucher
+   * @param payload - Chi tiết voucher đã áp dụng
+   */
+  notifyVoucherUsed(
+    userId: string,
+    payload: {
+      user_voucher_id: string;
+      voucher_title: string;
+      merchant_name: string;
+    },
+  ): void {
+    const socketId = this.userSocketMap.get(userId);
+
+    if (!socketId) {
+      this.logger.debug(
+        `[WS] User ${userId} không online, bỏ qua voucher notification`,
+      );
+      return;
+    }
+
+    this.server.to(socketId).emit('voucher_used', payload);
+    this.logger.log(
+      `[WS] Đã gửi voucher_used → userId=${userId} (${payload.voucher_title})`,
+    );
+  }
 }

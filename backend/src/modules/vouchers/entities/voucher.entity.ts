@@ -30,6 +30,9 @@ export class Voucher {
   @Column({ type: "uuid" })
   merchant_id: string;
 
+  @Column({ type: "uuid", nullable: true })
+  target_merchant_id?: string;
+
   @Column({ type: "varchar", length: 255 })
   title: string;
 
@@ -54,6 +57,10 @@ export class Voucher {
   @ManyToOne(() => Merchant, (merchant) => merchant.vouchers)
   @JoinColumn({ name: "merchant_id" })
   merchant: Merchant;
+
+  @ManyToOne(() => Merchant, { nullable: true })
+  @JoinColumn({ name: "target_merchant_id" })
+  target_merchant?: Merchant;
 
   @OneToMany(() => UserVoucher, (userVoucher) => userVoucher.voucher)
   userVouchers: UserVoucher[];

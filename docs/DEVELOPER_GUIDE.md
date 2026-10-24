@@ -78,10 +78,21 @@ Dự án đề cao tính linh hoạt. Các tham số nghiệp vụ quan trọng 
 | Docker Compose | `docker-compose.yml` | Khởi động PostgreSQL + pgAdmin bằng Docker |
 | SQL khởi tạo DB | `docker/init.sql` | Script chạy 1 lần khi tạo container PostgreSQL |
 | Theme Flutter (User) | `app_user/lib/core/theme.dart` | Màu sắc, font. Bắt buộc dùng thay vì hardcode |
-| Theme Flutter (Merchant) | `app_merchant/lib/core/theme.dart` | Tương tự |
+| Theme Flutter (Merchant) | `app_merchant/lib/core/theme.dart` | Bảng màu B2B Vàng #FAD240, Hồng #E8687D |
 | API Client (User) | `app_user/lib/core/api_client.dart` | Base URL kết nối tới Backend |
-| API Client (Merchant) | `app_merchant/lib/core/api_client.dart` | Tương tự |
+| API Client (Merchant) | `app_merchant/lib/core/api_client.dart` | Singleton Dio client kèm Bearer token interceptor |
+| App Router (Merchant) | `app_merchant/lib/core/router.dart` | Cấu hình GoRouter 4 tab shell & Auth Guard |
+| Auth Provider (Merchant) | `app_merchant/lib/providers/merchant_auth_provider.dart` | Quản lý đăng nhập B2B, lưu trữ session và danh sách demo |
+| Report & KPI Provider | `app_merchant/lib/providers/report_provider.dart` | Quản lý 4 thẻ KPI và lịch sử giao dịch gần nhất |
+| Scanner Provider | `app_merchant/lib/providers/scanner_provider.dart` | Xử lý tích điểm và áp dụng/trừ voucher của khách |
+| Deals & Voucher Provider | `app_merchant/lib/providers/merchant_voucher_provider.dart` | Danh sách ưu đãi và form tạo deal mới của cửa hàng |
+| Navigation Shell (Merchant) | `app_merchant/lib/screens/main_shell.dart` | 4 tab: Tổng quan, Quét mã, Quản lý Deal, Quầy & Cài đặt |
 | WebSocket Client (User) | `app_user/lib/core/socket_client.dart` | Quản lý kết nối Socket.IO real-time (Task 1.5) |
+| App Router (User) | `app_user/lib/core/router.dart` | Cấu hình GoRouter 4 tab shell & Auth Guard |
+| Auth Provider (User) | `app_user/lib/providers/auth_provider.dart` | Quản lý trạng thái OTP login, lưu trữ JWT Bearer token |
+| User & Điểm Provider | `app_user/lib/providers/user_provider.dart` | Quản lý thông tin hồ sơ, lịch sử biến động điểm VUI |
+| Voucher & My Voucher Provider | `app_user/lib/providers/my_voucher_provider.dart` | Quản lý kho voucher cá nhân, đổi voucher marketplace |
+| Navigation Shell (User) | `app_user/lib/screens/main_shell.dart` | Khung 4 tab điều hướng cố định (Trang chủ, Tích điểm, Đổi quà, Tài khoản) |
 | Quy tắc UI/UX | `docs/UI_Design_Rules.md` | Thông số màu, font, border radius chính xác |
 | Theo dõi task | `docs/task_tracker.md` | Cập nhật khi hoàn thành một task |
 

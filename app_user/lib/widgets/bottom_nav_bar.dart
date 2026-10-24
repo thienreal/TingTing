@@ -14,6 +14,8 @@
 ///
 /// Todo:
 ///   - [ ] Thêm badge số thông báo trên tab "Tích điểm" khi có giao dịch mới
+library;
+
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
 

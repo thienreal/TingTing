@@ -23,6 +23,19 @@ export class MerchantsController {
   constructor(private readonly merchantsService: MerchantsService) {}
 
   // ==========================================
+  // GET /merchants (Public / Merchant / User)
+  // ==========================================
+
+  /**
+   * Lấy danh sách toàn bộ đối tác trong mạng lưới liên minh TingTing.
+   * Dùng cho dropdown liên kết đối tác và hiển thị danh mục.
+   */
+  @Get()
+  getMerchants() {
+    return this.merchantsService.findAllActiveMerchants();
+  }
+
+  // ==========================================
   // GET /merchants/me/report (Merchant only)
   // ==========================================
 
@@ -35,5 +48,20 @@ export class MerchantsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   getReport(@CurrentUser() currentUser: { userId: string }) {
     return this.merchantsService.getReport(currentUser.userId);
+  }
+
+  // ==========================================
+  // GET /merchants/me/transactions (Merchant only)
+  // ==========================================
+
+  /**
+   * Lấy danh sách 30 giao dịch gần nhất của cửa hàng.
+   * Yêu cầu: JWT hợp lệ với role MERCHANT.
+   */
+  @Get("me/transactions")
+  @Roles("MERCHANT")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  getTransactions(@CurrentUser() currentUser: { userId: string }) {
+    return this.merchantsService.getTransactions(currentUser.userId);
   }
 }

@@ -26,6 +26,7 @@ import { UserVoucher } from "../user-vouchers/entities/user-voucher.entity";
 import { User } from "../users/entities/user.entity";
 import { Merchant } from "../merchants/entities/merchant.entity";
 import { AuthModule } from "../auth/auth.module";
+import { NotificationsModule } from "../notifications/notifications.module";
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { AuthModule } from "../auth/auth.module";
       Merchant, // Xác thực merchant khi tạo/dùng voucher
     ]),
     AuthModule,
+    NotificationsModule,
   ],
   controllers: [VouchersController],
   providers: [VouchersService],

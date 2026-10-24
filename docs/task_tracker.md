@@ -92,20 +92,21 @@
 
 ### 1.6 Phát triển Mobile App - User App
 
-- [ ] **Auth:** Nhập sđt -> Nhập OTP (`000000`) -> Đăng nhập.
-- [ ] **Home:** Xem điểm, banner quảng cáo.
-- [ ] **Earn:** QR Code định danh động, làm mới mỗi 60 giây.
-- [ ] **Rewards:** Danh sách Voucher, chi tiết, nút "Đổi ngay".
-- [ ] **My Vouchers:** Voucher đang có, hiển thị barcode để cửa hàng quét. *(Đã bỏ tính năng Tặng Voucher)*
+- [x] **Auth:** Nhập sđt -> Nhập OTP (`000000`) -> Đăng nhập.
+- [x] **Home:** Xem điểm, banner quảng cáo.
+- [x] **Earn:** QR Code định danh động, làm mới mỗi 60 giây.
+- [x] **Rewards:** Danh sách Voucher, chi tiết, nút "Đổi ngay".
+- [x] **My Vouchers:** Voucher đang có, hiển thị barcode để cửa hàng quét. *(Đã bỏ tính năng Tặng Voucher)*
 
 ---
 
 ### 1.7 Phát triển Mobile App - Merchant App
 
-- [ ] **Auth:** Đăng nhập Email/Password.
-- [ ] **Scan QR:** Quét mã User để cộng điểm (nhập số tiền hóa đơn) HOẶC quét Voucher để xác nhận áp dụng.
-- [ ] **Create Deal:** Form tạo Voucher, cho phép Merchant tự **nhập hạn mức điểm cần để đổi (points_cost)**, số lượng phát hành.
-- [ ] **Report:** Thống kê CRM cơ bản.
+- [x] **Auth:** Đăng nhập Email/Password với danh sách 5 đối tác demo chọn nhanh.
+- [x] **Scan QR:** Quét mã User để cộng điểm (nhập số tiền hóa đơn) HOẶC quét Voucher để xác nhận áp dụng (kèm nhập mã tay và nạp mã mẫu kiểm thử).
+- [x] **Create Deal:** Form tạo Voucher, cho phép Merchant tự **nhập hạn mức điểm cần để đổi (points_cost)**, số lượng phát hành, ngày hết hạn và Live Card Preview trực quan.
+- [x] **Report:** Thống kê CRM và 4 thẻ chỉ số KPI tổng quan (`active_vouchers_count`, `total_points_issued`, `total_transactions`, `used_vouchers_count`) cùng lịch sử giao dịch gần nhất.
+- [x] **Account & Counter:** Hiển thị thông tin đối tác và mã QR quầy tĩnh (`qr_static_code`) bằng QrImageView.
 
 ---
 
@@ -113,4 +114,16 @@
 
 - [ ] Viết unit test chống double-spending cho `redeem`.
 - [ ] Test luồng thủ công trên Postman (đã có script Seed).
-- [ ] Cài đặt 2 app lên máy thật/máy ảo cùng mạng LAN, test quét QR thực tế qua Camera.
+- [x] Cài đặt 2 app lên máy thật/máy ảo cùng mạng LAN, test quét QR thực tế qua Camera.
+
+---
+
+### 1.9 Tính Năng Liên Kết Đối Tác & Tung Deal Kích Cầu Chéo (Cross-Merchant Promotion)
+
+- [x] **Database & Backend Entity:** Thêm `target_merchant_id` vào bảng `vouchers` và relation `target_merchant` với bảng `merchants`.
+- [x] **Backend API:** Thêm endpoint `GET /merchants` lấy danh sách thương hiệu trong liên minh TingTing.
+- [x] **Phân quyền Quét Voucher:** Cập nhật `VouchersService.useVoucher` cho phép đối tác thụ hưởng (`target_merchant_id`) quét mã trừ voucher của khách.
+- [x] **Dữ liệu mẫu Seed:** Bổ sung các voucher liên minh kích cầu chéo thực tế (Highlands ➔ CGV, CGV ➔ The Coffee House, Pizza 4P's ➔ Uniqlo).
+- [x] **Merchant App - Tạo Deal:** Thêm tùy chọn "Nội bộ quán" vs "Deal liên kết", dropdown chọn đối tác liên kết, Live Card Preview cập nhật thời gian thực.
+- [x] **Merchant App - Quản lý Deal & Scanner:** Bổ sung bộ lọc "Deal liên kết", badge thẻ liên kết, popup thông báo quét thành công vinh danh thương hiệu tài trợ.
+- [x] **User App:** Thẻ VoucherCard, màn hình VoucherDetailScreen và màn hình MyVoucherBarcodeScreen hiển thị huy hiệu `🤝 LIÊN MINH`, thông tin đồng thương hiệu và hướng dẫn địa điểm áp dụng.

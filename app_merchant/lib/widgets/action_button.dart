@@ -7,13 +7,16 @@
 /// Responsibility:
 ///   - Cung cấp widget nút bấm tái sử dụng cho toàn bộ Merchant App.
 ///   - Hỗ trợ variant: filled (mặc định) và outlined (thứ cấp).
+///   - Hỗ trợ trạng thái loading mượt mà.
 ///   - Tuân thủ UI_Design_Rules: bo góc 12px, full width, màu từ theme.
 ///
 /// Dependencies:
 ///   - app_merchant/lib/core/theme.dart (AppColors)
 ///
 /// Todo:
-///   - [ ] Thêm trạng thái loading (CircularProgressIndicator)
+///   - [ ] Bổ sung hiệu ứng rung nhẹ (haptic feedback) khi nhấn
+library;
+
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
 
@@ -35,28 +38,12 @@ enum ActionButtonVariant { filled, outlined }
 /// Dùng màu [AppColors.primary] (#FAD240) cho variant filled,
 /// [AppColors.action] (#E8687D) cho variant outlined.
 /// Bo góc 12px, trải dài full-width theo UI_Design_Rules.
-///
-/// Ví dụ sử dụng:
-/// ```dart
-/// // Nút chính: Quét QR
-/// ActionButton(
-///   label: 'Quét mã QR',
-///   icon: Icons.qr_code_scanner,
-///   onPressed: () => _openScanner(),
-/// )
-///
-/// // Nút phụ: Huỷ
-/// ActionButton(
-///   label: 'Huỷ',
-///   variant: ActionButtonVariant.outlined,
-///   onPressed: () => Navigator.pop(context),
-/// )
-/// ```
 class ActionButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
   final IconData? icon;
   final ActionButtonVariant variant;
+  final bool isLoading;
 
   const ActionButton({
     super.key,
@@ -64,6 +51,7 @@ class ActionButton extends StatelessWidget {
     required this.onPressed,
     this.icon,
     this.variant = ActionButtonVariant.filled,
+    this.isLoading = false,
   });
 
   @override
@@ -84,12 +72,10 @@ class ActionButton extends StatelessWidget {
   /// Nút nền vàng — dùng cho hành động chính trong Merchant App.
   Widget _buildFilledButton() {
     return ElevatedButton(
-      onPressed: onPressed,
+      onPressed: isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
-        // Màu Primary (Vàng) cho Merchant App — phân biệt với User App màu Hồng
         backgroundColor: AppColors.primary,
-        disabledBackgroundColor: AppColors.primary.withOpacity(0.4),
-        // Chữ đen trên nền vàng để đảm bảo contrast
+        disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.4),
         foregroundColor: AppColors.textPrimary,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -97,20 +83,29 @@ class ActionButton extends StatelessWidget {
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 24),
       ),
-      child: _buildButtonContent(labelColor: AppColors.textPrimary),
+      child: isLoading
+          ? const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: AppColors.textPrimary,
+              ),
+            )
+          : _buildButtonContent(labelColor: AppColors.textPrimary),
     );
   }
 
   /// Nút viền hồng — dùng cho hành động thứ cấp (huỷ, quay lại...).
   Widget _buildOutlinedButton() {
     return OutlinedButton(
-      onPressed: onPressed,
+      onPressed: isLoading ? null : onPressed,
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.action,
         side: BorderSide(
-          color: onPressed != null
+          color: (onPressed != null && !isLoading)
               ? AppColors.action
-              : AppColors.action.withOpacity(0.3),
+              : AppColors.action.withValues(alpha: 0.3),
           width: 1.5,
         ),
         shape: RoundedRectangleBorder(
@@ -118,7 +113,16 @@ class ActionButton extends StatelessWidget {
         ),
         padding: const EdgeInsets.symmetric(horizontal: 24),
       ),
-      child: _buildButtonContent(labelColor: AppColors.action),
+      child: isLoading
+          ? const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: AppColors.action,
+              ),
+            )
+          : _buildButtonContent(labelColor: AppColors.action),
     );
   }
 

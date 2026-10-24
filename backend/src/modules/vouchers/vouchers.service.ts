@@ -39,6 +39,7 @@ import { User } from "../users/entities/user.entity";
 import { Merchant } from "../merchants/entities/merchant.entity";
 import { CreateVoucherDto } from "./dto/create-voucher.dto";
 import { UseVoucherDto } from "./dto/use-voucher.dto";
+import { NotificationsGateway } from "../notifications/notifications.gateway";
 
 @Injectable()
 export class VouchersService {
@@ -58,6 +59,7 @@ export class VouchersService {
     private readonly merchantRepository: Repository<Merchant>,
 
     private readonly dataSource: DataSource,
+    private readonly notificationsGateway: NotificationsGateway,
   ) {}
 
   // ==========================================
@@ -77,7 +79,7 @@ export class VouchersService {
         // Chỉ hiển thị voucher còn tồn kho
         remaining_quantity: MoreThan(0),
       },
-      relations: ["merchant"],
+      relations: ["merchant", "target_merchant"],
       order: { points_cost: "ASC" },
     });
   }
@@ -96,7 +98,7 @@ export class VouchersService {
   async findOne(id: string): Promise<Voucher> {
     const voucher = await this.voucherRepository.findOne({
       where: { id },
-      relations: ["merchant"],
+      relations: ["merchant", "target_merchant"],
     });
     if (!voucher) {
       throw new NotFoundException(`Không tìm thấy voucher với ID: ${id}`);
@@ -119,7 +121,7 @@ export class VouchersService {
   async findMyVouchers(userId: string): Promise<UserVoucher[]> {
     return this.userVoucherRepository.find({
       where: { user_id: userId },
-      relations: ["voucher", "voucher.merchant"],
+      relations: ["voucher", "voucher.merchant", "voucher.target_merchant"],
       order: { created_at: "DESC" },
     });
   }
@@ -129,7 +131,7 @@ export class VouchersService {
   // ==========================================
 
   /**
-   * Merchant tạo Voucher mới cho cửa hàng mình.
+   * Merchant tạo Voucher mới cho cửa hàng mình hoặc liên kết đối tác.
    * remaining_quantity được khởi tạo bằng total_quantity.
    *
    * @param merchantId - UUID Merchant từ JWT
@@ -148,8 +150,18 @@ export class VouchersService {
       throw new NotFoundException("Cửa hàng không tồn tại hoặc đã bị khoá");
     }
 
+    if (dto.target_merchant_id) {
+      const target = await this.merchantRepository.findOne({
+        where: { id: dto.target_merchant_id, is_active: true },
+      });
+      if (!target) {
+        throw new NotFoundException("Đối tác áp dụng không tồn tại hoặc đã bị khoá");
+      }
+    }
+
     const voucher = this.voucherRepository.create({
       merchant_id: merchantId,
+      target_merchant_id: dto.target_merchant_id || undefined,
       title: dto.title,
       description: dto.description,
       points_cost: dto.points_cost,
@@ -162,9 +174,32 @@ export class VouchersService {
     const saved = await this.voucherRepository.save(voucher);
     this.logger.log(
       `Merchant ${merchantId} tạo voucher: "${dto.title}" | ` +
-        `${dto.points_cost} điểm | SL: ${dto.total_quantity}`,
+        `${dto.points_cost} điểm | SL: ${dto.total_quantity}` +
+        (dto.target_merchant_id ? ` | Liên kết: ${dto.target_merchant_id}` : ""),
     );
     return saved;
+  }
+
+  // ==========================================
+  // API: GET /merchants/vouchers  (Merchant)
+  // ==========================================
+
+  /**
+   * Lấy danh sách Voucher do Merchant phát hành hoặc được chỉ định áp dụng.
+   * Sắp xếp theo ngày tạo mới nhất trước.
+   *
+   * @param merchantId - UUID Merchant từ JWT
+   * @returns Danh sách Voucher của cửa hàng
+   */
+  async findMerchantVouchers(merchantId: string): Promise<Voucher[]> {
+    return this.voucherRepository.find({
+      where: [
+        { merchant_id: merchantId },
+        { target_merchant_id: merchantId },
+      ],
+      relations: ["merchant", "target_merchant"],
+      order: { created_at: "DESC" },
+    });
   }
 
   // ==========================================
@@ -306,7 +341,7 @@ export class VouchersService {
       // Load lại relation voucher để trả về đủ thông tin cho client
       return this.userVoucherRepository.findOne({
         where: { id: savedUserVoucher.id },
-        relations: ["voucher", "voucher.merchant"],
+        relations: ["voucher", "voucher.merchant", "voucher.target_merchant"],
       });
     } catch (error) {
       // ==========================================
@@ -333,7 +368,7 @@ export class VouchersService {
    *
    * Kiểm tra:
    *   - UserVoucher tồn tại
-   *   - Voucher thuộc cửa hàng của Merchant đang đăng nhập (bảo mật)
+   *   - Voucher thuộc cửa hàng phát hành HOẶC đối tác kích cầu thụ hưởng (bảo mật liên minh)
    *   - Trạng thái đang là ACTIVE (chưa dùng, chưa hết hạn)
    *   - Voucher gốc chưa hết hạn
    *
@@ -348,11 +383,11 @@ export class VouchersService {
     const { user_voucher_id } = dto;
 
     // ==========================================
-    // TÌM USER VOUCHER KÈM VOUCHER GỐC
+    // TÌM USER VOUCHER KÈM VOUCHER GỐC VÀ CẢ 2 ĐỐI TÁC
     // ==========================================
     const userVoucher = await this.userVoucherRepository.findOne({
       where: { id: user_voucher_id },
-      relations: ["voucher"],
+      relations: ["voucher", "voucher.merchant", "voucher.target_merchant"],
     });
 
     if (!userVoucher) {
@@ -362,11 +397,13 @@ export class VouchersService {
     }
 
     // ==========================================
-    // BẢO MẬT: CHỈ MERCHANT CÓ VOUCHER ĐÓ MỚI ĐƯỢC QUÉT
-    // Tránh trường hợp Merchant A quét voucher của Merchant B
+    // BẢO MẬT: ĐỐI TÁC THỤ HƯỞNG HOẶC ĐỐI TÁC TẠO MỚI ĐƯỢC QUÉT
+    // Cho phép Merchant B (thụ hưởng) hoặc Merchant A (phát hành) quét
     // ==========================================
-    if (userVoucher.voucher.merchant_id !== merchantId) {
-      throw new ForbiddenException("Voucher này không thuộc cửa hàng của bạn");
+    const isIssuer = userVoucher.voucher.merchant_id === merchantId;
+    const isTarget = userVoucher.voucher.target_merchant_id === merchantId;
+    if (!isIssuer && !isTarget) {
+      throw new ForbiddenException("Voucher này không áp dụng tại cửa hàng của bạn");
     }
 
     // ==========================================
@@ -398,6 +435,20 @@ export class VouchersService {
     this.logger.log(
       `Merchant ${merchantId} xác nhận dùng UserVoucher ${user_voucher_id}`,
     );
+
+    // ==========================================
+    // PHÁT SỰ KIỆN WEBSOCKET BÁO USER APP
+    // ==========================================
+    const applyingMerchantName =
+      (isTarget ? userVoucher.voucher.target_merchant?.name : null) ||
+      userVoucher.voucher.merchant?.name ||
+      "Cửa hàng";
+
+    this.notificationsGateway.notifyVoucherUsed(userVoucher.user_id, {
+      user_voucher_id: userVoucher.id,
+      voucher_title: userVoucher.voucher.title,
+      merchant_name: applyingMerchantName,
+    });
 
     return updated;
   }

@@ -129,6 +129,21 @@ export class VouchersController {
   }
 
   // ==========================================
+  // GET /merchants/vouchers  (Merchant)
+  // ==========================================
+
+  /**
+   * Lấy danh sách toàn bộ voucher do chính cửa hàng phát hành.
+   * Yêu cầu: JWT hợp lệ với role MERCHANT.
+   */
+  @Get("merchants/vouchers")
+  @Roles("MERCHANT")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  findMerchantVouchers(@CurrentUser() currentUser: { userId: string }) {
+    return this.vouchersService.findMerchantVouchers(currentUser.userId);
+  }
+
+  // ==========================================
   // POST /points/use-voucher  (Merchant)
   // ==========================================
 

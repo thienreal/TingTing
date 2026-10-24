@@ -4,6 +4,50 @@
 
 ---
 
+### [2026-10-23 15:02:00] Sửa Lỗi Vòng Lặp Reload Lịch Sử & Tích Hợp Ảnh Thật Cho Voucher
+
+- **Task:** Tối ưu hóa UI/UX và khắc phục sự cố hiển thị (Task 1.6 Follow-up)
+- **Các công việc đã thực hiện:**
+  1. **Khắc phục vòng lặp reload liên tục khi vào Lịch sử / Đổi**:
+     - Phát hiện nguyên nhân: `UserNotifier.build()` theo dõi `authProvider.user`. Khi `loadProfile()` thành công, nó gọi `authProvider.notifier.updateUser(user)`, làm thay đổi `authProvider`, kích hoạt `UserNotifier.build()` chạy lại và gọi tiếp `loadProfile()` → vòng lặp vô tận khiến màn hình bị giật và reload liên tục.
+     - Giải pháp: Chuyển `UserNotifier.build()` sang theo dõi `authProvider.select((s) => s.isAuthenticated)`. Bỏ lời gọi ngược `updateUser()` trong `loadProfile()`, lưu trực tiếp vào SharedPreferences.
+     - Gỡ bỏ `postFrameCallback` lặp trong `HomeScreen.build()`.
+  2. **Tích hợp hình ảnh thực tế chất lượng cao cho toàn bộ Voucher**:
+     - Thêm getter `realImageUrl` vào `VoucherModel` ánh xạ chính xác đến các bộ ảnh chụp ẩm thực, cà phê, pizza, lẩu, rạp phim, mua sắm chuẩn Unsplash theo thương hiệu (Highlands, Phúc Long, The Coffee House, Gong Cha, Pizza 4P's, Haidilao, Circle K, CGV Cinemas, Uniqlo, Guardian).
+     - Thay thế toàn bộ placeholder gradient bằng `Image.network` trong `VoucherCard`, thẻ vé nhanh `HomeScreen`, danh sách cuống vé `MyVouchersScreen`.
+     - Nâng cấp `VoucherDetailScreen`: Hiển thị hero image full-bleed 250px kèm gradient overlay điện ảnh và badge thương hiệu nổi bật.
+  3. **Kiểm thử**:
+     - `flutter analyze`: 0 warnings, 0 errors.
+     - `flutter test`: 6/6 tests passed.
+- **Lý do:** Khắc phục lỗi vòng lặp render và nâng cấp giao diện voucher lên chuẩn thiết kế sản phẩm hoàn thiện.
+
+---
+
+### [2026-10-23 14:41:00] Sửa Lỗi Điều Hướng GoRouter & Nâng Cấp Dữ Liệu Mẫu (Seed Data)
+
+- **Task:** Hỗ trợ Kiểm thử Giao diện & Trải Nghiệm User App (Task 1.6 Follow-up)
+- **Các công việc đã thực hiện:**
+  1. **Khắc phục lỗi điều hướng OTP**:
+     - Phát hiện nguyên nhân: `routerProvider` trong `router.dart` trước đó dùng `ref.watch(authProvider)`. Khi gửi OTP, `authProvider` chuyển `isLoading = true` rồi `false`, khiến `GoRouter` bị khởi tạo lại 2 lần liên tiếp và reset về `/auth/phone`.
+     - Giải pháp: Tạo class `RouterNotifier extends ChangeNotifier`, dùng `ref.listen` chỉ bắt sự thay đổi của `isAuthenticated`, tích hợp `refreshListenable: routerNotifier` vào `GoRouter`.
+  2. **Nâng cấp Seed Data phong phú & chân thực (`backend/src/seeds/seed.ts`)**:
+     - Tối ưu tài khoản `0900000001`: Đặt tên "Nguyễn Hoàng Nam", số dư 1.250 điểm VUI (Hạng Bạc - SILVER).
+     - Nạp 10 thương hiệu hàng đầu: Highlands Coffee, Phúc Long, The Coffee House, Gong Cha, Pizza 4P's, Haidilao, Circle K, CGV Cinemas, Uniqlo, Guardian.
+     - Nạp 20 voucher ưu đãi thực tế, phong phú về mô tả và chi phí đổi điểm.
+     - Nạp 6 voucher cá nhân cho `0900000001`: 3 voucher Đang có (Active), 2 voucher Đã dùng (Used), 1 voucher Hết hạn (Expired) để kiểm tra đủ 3 tab My Vouchers.
+     - Nạp 13 giao dịch tích điểm và đổi điểm trong 30 ngày qua, biến động điểm cân đối chính xác 100% với số dư 1.250 VUI.
+  3. **Chạy seed và kiểm thử**:
+     - Chạy `npm run seed` thành công nạp toàn bộ vào database PostgreSQL.
+     - Bổ sung widget test kiểm tra `PhoneInputScreen` và chạy `flutter test`: 6/6 bài test vượt qua.
+- **Lý do:** Đáp ứng yêu cầu của người dùng muốn tài khoản thử nghiệm trông giống tài khoản thật đang sử dụng để kiểm thử toàn diện giao diện.
+- **Thông số kỹ thuật:**
+  - Phone: `0900000001`, OTP: `000000`.
+  - User: Nguyễn Hoàng Nam, 1.250 VUI, Hạng SILVER.
+  - User Vouchers: 3 Active, 2 Used, 1 Expired.
+  - Transactions: 13 records (EARN & REDEEM).
+
+---
+
 ### [2026-10-13 11:00:00] Hoàn thành Task 1.5 — Tích hợp WebSocket (Real-time Notification)
 
 - **Task:** 1.5 — Tích hợp WebSocket (Real-time Notification)
@@ -553,3 +597,55 @@
 - **Các công việc đã thực hiện:**
   1. Cập nhật file `docs/DEVELOPER_GUIDE.md`: Bổ sung thông tin tài khoản đăng nhập pgAdmin (`admin@tingting.dev` / `admin123`) và chuỗi kết nối PostgreSQL (`postgresql://postgres:123456@localhost:5432/tingting_db`) vào phần hướng dẫn khởi chạy Docker.
 - **Lý do:** Giúp các lập trình viên dễ dàng tra cứu thông tin đăng nhập giao diện pgAdmin và DB trực tiếp từ tài liệu hướng dẫn mà không cần phải mở xem nội dung file `docker-compose.yml` hay `.env`.
+
+## Hoàn thành Task 1.6: Phát triển Mobile App - User App (Flutter) - 2026-10-23
+- **Ngày giờ thực hiện:** 2026-10-23 14:15:00
+- **Các công việc đã thực hiện:**
+  1. Xây dựng toàn diện giao diện và tính năng cho User App (`app_user/`) trên nền tảng Flutter:
+     - **Auth Flow:** Màn hình nhập SĐT chuẩn định dạng VN (`PhoneInputScreen`) và màn hình OTP 6 ô có đếm ngược 60s (`OtpScreen`), tự động kết nối Backend `POST /auth/send-otp` và `POST /auth/verify-otp`.
+     - **Trang chủ (`HomeScreen`):** Header vàng thông tin điểm VUI, hạng thành viên, thanh tìm kiếm bo tròn 50px dạng Pill, thẻ vé nhanh "Ưu đãi của bạn", Banner Carousel khuyến mãi, danh sách cuộn ngang "Ưu Đãi Mới Cập Bến" và "Deal Hot Ăn Ngon".
+     - **Tích điểm (`EarnPointsScreen`):** Thẻ thông tin hội viên, mã Dynamic QR Code tự động làm mới mỗi 60 giây kèm đồng hồ đếm ngược tròn và nút refresh thủ công, lưới thương hiệu đối tác tích điểm.
+     - **Đổi thưởng (`RewardsScreen` & `VoucherDetailScreen`):** Sàn Marketplace đổi quà với tìm kiếm, lọc theo ngành hàng, chi tiết voucher dạng thẻ vé có vết cắt bán nguyệt 2 bên (`TicketNotchClipper`), thanh cố định đáy màn hình hiển thị điểm và nút "Đổi ngay" kết nối API `POST /vouchers/:id/redeem`.
+     - **Ưu đãi của bạn (`MyVouchersScreen` & `MyVoucherBarcodeScreen`):** Quản lý 3 tab (Đang có, Đã dùng, Hết hạn) với gạch chân màu hồng `#E8687D`, màn hình hiển thị Barcode vector 1D sắc nét và mã định danh để thu ngân quét tại quầy.
+     - **Tài khoản & Lịch sử (`AccountScreen` & `TransactionHistoryScreen`):** Quản lý hồ sơ, danh sách biến động điểm (+/- VUI, hóa đơn, thời gian), đăng xuất xóa token.
+     - **Real-time WebSocket:** Lắng nghe sự kiện `points_earned` từ Socket.IO cổng 3001, tự động cập nhật số dư điểm của user và hiển thị thông báo SnackBar chúc mừng nổi toàn app.
+  2. Áp dụng State Management hiện đại với Riverpod 3.0 (`Notifier` & `NotifierProvider`), GoRouter với `StatefulShellRoute`.
+  3. Hoàn thiện Unit & Widget tests trong `test/widget_test.dart` (5/5 tests passed).
+  4. Đạt chuẩn `flutter analyze`: 0 errors, 0 warnings.
+  5. Đánh dấu hoàn thành toàn bộ Task 1.6 trong `docs/task_tracker.md`.
+- **Lý do:** Đáp ứng yêu cầu của người dùng về việc triển khai trọn vẹn Task 1.6 với giao diện sắc nét, chỉn chu như một sản phẩm hoàn thiện theo đúng tài liệu `UI_Design_Rules.md` và các ảnh thiết kế mẫu.
+- **Mục đích:** Hoàn thiện trải nghiệm người dùng cuối (User App) sẵn sàng cho việc kết nối tương tác với Merchant App ở Task 1.7.
+- **Lợi ích:** Người dùng có thể thực hiện toàn bộ hành trình: Đăng nhập -> Xem điểm -> Đưa QR tích điểm -> Đổi voucher -> Xem Barcode áp dụng giảm giá tại cửa hàng.
+- **Thông tin cần lưu ý & Thông số kỹ thuật:**
+  - Riverpod 3.4.2: Dùng `Notifier` thay cho `StateNotifier`.
+  - Base URL tự động nhận diện nền tảng: `http://10.0.2.2:3000` cho Android Emulator, `http://localhost:3000` cho Desktop/Web.
+  - Mã Mock OTP thử nghiệm: `000000`.
+
+## Hoàn thành Task 1.7: Phát triển Mobile App - Merchant App (Flutter) - 2026-10-23
+- **Ngày giờ thực hiện:** 2026-10-23 15:25:00
+- **Các công việc đã thực hiện:**
+  1. **Nâng cấp Backend NestJS:**
+     - Bổ sung endpoint `GET /merchants/vouchers` (`VouchersController` & `VouchersService`) cho phép cửa hàng đối tác lấy danh sách ưu đãi do chính mình phát hành.
+     - Bổ sung endpoint `GET /merchants/me/transactions` (`MerchantsController` & `MerchantsService`) trả về 30 giao dịch gần nhất của cửa hàng kèm tên và số điện thoại ẩn danh của khách hàng.
+     - Kiểm thử `npm run build` thành công 100%.
+  2. **Xây dựng toàn diện Merchant App (`app_merchant/`):**
+     - **Core & Theme:** Định nghĩa `theme.dart` chuẩn B2B với tone Vàng `#FAD240` chủ đạo, điểm nhấn hành động Hồng `#E8687D`, đổ bóng mờ 0.05 opacity với `withValues(alpha: ...)`, cấu hình `api_client.dart` tự động bắt nền tảng và gắn Bearer Token qua Dio Interceptor, `constants.dart` định nghĩa các key lưu trữ.
+     - **Auth Flow (`MerchantLoginScreen`):** Đăng nhập bằng Email/Password, tích hợp sẵn danh sách 5 đối tác demo mẫu (Highlands Coffee, Phúc Long, The Coffee House, Circle K, CGV Cinemas - Mật khẩu chung: `123456`) để kiểm thử 1-chạm cực kỳ nhanh chóng.
+     - **Main Layout (`MainShell`):** Thanh điều hướng BottomNavigationBar 4 tab cố định (Tổng quan, Quét mã, Quản lý Deal, Quầy & Cài đặt) bo góc hiện đại.
+     - **Tổng quan (`DashboardScreen`):** 4 thẻ KPI chỉ số kinh doanh (`active_vouchers_count`, `total_points_issued`, `total_transactions`, `used_vouchers_count`), lối tắt thao tác nhanh cho thu ngân và danh sách lịch sử giao dịch gần đây tích hợp `TransactionTile`.
+     - **Quét mã đa năng (`ScanScreen`):** Hỗ trợ 2 chế độ:
+       - *Tích điểm:* Quét QR động của User (hoặc nhập User ID tay), nhập số tiền hóa đơn tự động tính điểm VUI dự kiến theo tỉ lệ 1.000đ = 1 điểm, dialog chúc mừng thành công và hiển thị thăng hạng.
+       - *Trừ voucher:* Quét mã barcode/QR UserVoucher, gọi `POST /points/use-voucher` đổi trạng thái sang `USED`, hiển thị thông tin voucher đã áp dụng thành công.
+       - Tích hợp ô nhập mã bằng tay và nút "Nạp mã mẫu" phục vụ kiểm thử mượt mà trên môi trường máy ảo và Linux desktop không có camera.
+     - **Quản lý Voucher (`MerchantVouchersScreen`):** Danh sách ưu đãi của quán kèm thanh tiến trình tồn kho (`remaining / total`), ngày hết hạn, bộ lọc trạng thái (Tất cả, Đang mở, Đã hết).
+     - **Tạo Deal mới (`CreateVoucherScreen`):** Form thiết lập tiêu đề, mô tả, số điểm cần đổi (`points_cost`), số lượng phát hành, ngày hết hạn (Date Picker) kèm màn hình Thẻ Voucher Xem Trước (Live Preview) tương tác trực tiếp theo thời gian thực.
+     - **Quầy & Cài đặt (`MerchantAccountScreen`):** Thông tin cửa hàng, hiển thị mã QR tĩnh tại quầy (`qr_static_code`, vd: `QR_HIGHLANDS`) bằng `QrImageView` chuẩn nét cao để in ấn, chuyển nhanh tài khoản đối tác demo, đăng xuất an toàn.
+  3. **Kiểm thử tự động & Đảm bảo chất lượng:**
+     - Viết 7 unit & widget tests trong `test/widget_test.dart` bao phủ Models serialization, ActionButton, TransactionTile và toàn bộ luồng khởi động MerchantApp: 7/7 tests passed.
+     - `flutter analyze`: 0 errors, 0 warnings.
+     - Cập nhật tiến độ `docs/task_tracker.md` (đánh dấu hoàn thành Task 1.7).
+- **Lý do:** Hoàn thành toàn diện Task 1.7 trong lộ trình MVP của dự án TingTing, cung cấp giải pháp vận hành hoàn chỉnh cho đối tác kinh doanh (Merchant).
+- **Mục đích:** Đảm bảo hệ sinh thái TingTing có đầy đủ cả 2 ứng dụng di động: App khách hàng (Tích & Đổi điểm) và App thu ngân/đối tác (Cộng điểm & Áp dụng voucher).
+- **Lợi ích:** Cho phép kiểm thử khép kín toàn bộ luồng trải nghiệm người dùng thực tế: Khách mua hàng -> Thu ngân quét mã tích điểm -> Khách đổi voucher -> Thu ngân quét trừ voucher.
+
+

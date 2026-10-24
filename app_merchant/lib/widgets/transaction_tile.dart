@@ -14,6 +14,8 @@
 ///
 /// Todo:
 ///   - [ ] Hỗ trợ swipe-to-delete để huỷ giao dịch nhầm (cần API support)
+library;
+
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
 
@@ -70,17 +72,6 @@ class TransactionTileData {
 ///
 /// Theo thiết kế: card trắng bo góc 12px, đổ bóng nhạt.
 /// Delta điểm hiển thị màu xanh lá (+) hoặc đỏ san hô (-).
-///
-/// Ví dụ sử dụng trong ListView:
-/// ```dart
-/// ListView.separated(
-///   itemCount: transactions.length,
-///   separatorBuilder: (_, __) => const SizedBox(height: 8),
-///   itemBuilder: (context, index) => TransactionTile(
-///     data: transactions[index],
-///   ),
-/// )
-/// ```
 class TransactionTile extends StatelessWidget {
   final TransactionTileData data;
   final VoidCallback? onTap;
@@ -103,7 +94,7 @@ class TransactionTile extends StatelessWidget {
           // Shadow nhạt giống UI_Design_Rules §UI Components — Shadows
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -143,10 +134,9 @@ class TransactionTile extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (data.billAmount != null) ...[
+                  if (data.billAmount != null && data.billAmount! > 0) ...[
                     const SizedBox(height: 2),
                     Text(
-                      // Hiển thị số tiền hóa đơn theo định dạng VND
                       'Hóa đơn: ${_formatCurrency(data.billAmount!)}đ',
                       style: const TextStyle(
                         fontSize: 11,
@@ -164,7 +154,6 @@ class TransactionTile extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                // Delta điểm — xanh khi cộng (+), đỏ khi trừ (-)
                 Text(
                   _formattedDelta,
                   style: TextStyle(
@@ -193,7 +182,6 @@ class TransactionTile extends StatelessWidget {
   // HELPER GETTERS & METHODS
   // ==========================================
 
-  /// Icon phân loại giao dịch với nền màu tương ứng.
   Widget _buildTypeIcon() {
     return Container(
       width: 40,
@@ -206,7 +194,6 @@ class TransactionTile extends StatelessWidget {
     );
   }
 
-  /// Icon đại diện cho từng loại giao dịch.
   IconData get _typeIcon {
     switch (data.type) {
       case TransactionType.earnPoints:
@@ -218,7 +205,6 @@ class TransactionTile extends StatelessWidget {
     }
   }
 
-  /// Màu icon — xanh lá (cộng điểm), hồng (đổi/dùng voucher).
   Color get _iconColor {
     switch (data.type) {
       case TransactionType.earnPoints:
@@ -229,18 +215,16 @@ class TransactionTile extends StatelessWidget {
     }
   }
 
-  /// Màu nền icon.
   Color get _iconBackgroundColor {
     switch (data.type) {
       case TransactionType.earnPoints:
-        return const Color(0xFF2ECC71).withOpacity(0.1);
+        return const Color(0xFF2ECC71).withValues(alpha: 0.1);
       case TransactionType.redeemVoucher:
       case TransactionType.useVoucher:
-        return AppColors.action.withOpacity(0.1);
+        return AppColors.action.withValues(alpha: 0.1);
     }
   }
 
-  /// Nhãn loại giao dịch hiển thị trên Tile.
   String get _typeLabel {
     switch (data.type) {
       case TransactionType.earnPoints:
@@ -252,20 +236,17 @@ class TransactionTile extends StatelessWidget {
     }
   }
 
-  /// Chuỗi delta điểm có ký hiệu (+/-) và format số.
   String get _formattedDelta {
     final sign = data.pointsDelta > 0 ? '+' : '';
     return '$sign${data.pointsDelta} điểm';
   }
 
-  /// Màu delta: xanh lá khi dương (cộng), đỏ san hô khi âm (trừ).
   Color get _deltaColor {
     return data.pointsDelta > 0
         ? const Color(0xFF2ECC71)
         : AppColors.action;
   }
 
-  /// Định dạng giờ phút hiển thị (vd: "09:45 • 25/09/2026").
   String get _formattedTime {
     final dt = data.createdAt;
     final h = dt.hour.toString().padLeft(2, '0');
@@ -275,7 +256,6 @@ class TransactionTile extends StatelessWidget {
     return '$h:$m • $d/$mo/${dt.year}';
   }
 
-  /// Định dạng tiền VND có dấu chấm phân cách (vd: 250.000).
   String _formatCurrency(double amount) {
     final intAmount = amount.toInt();
     final str = intAmount.toString();
