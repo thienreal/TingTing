@@ -179,108 +179,56 @@ TingTing/
 
 ---
 
-## ⚡ 7. Hướng Dẫn Cài Đặt & Khởi Chạy
+## ⚡ 7. Hướng Dẫn Khởi Chạy
 
-### 🚀 7.1. Khởi Chạy Lại Nhanh (Dành cho máy đã cài đặt trước đó)
+### 🚀 7.1. Quick Run (Chạy lại cho máy đã cài đặt)
 
-> **Dành cho những lần code, kiểm thử hoặc chạy demo tiếp theo** — bạn không cần phải cấu hình lại database hay cài đặt lại thư viện.
+> 💡 **Mô hình test thực tế:** Client App (`app_user`) chạy trên **Laptop**, Merchant App (`app_merchant`) chạy trên **Điện thoại thật** (dùng camera quét mã QR/Barcode).
 
-Chỉ cần mở các tab Terminal và chạy theo thứ tự:
-
-#### 1️⃣ Bật Database (PostgreSQL & pgAdmin):
 ```bash
+# 1. Bật Database
 docker-compose up -d
+
+# 2. Bật Backend (Terminal 1)
+cd backend && npm run start:dev
+
+# 3. Client App (User) - Chạy trên Laptop (Terminal 2)
+cd app_user && flutter run -d linux   # hoặc: flutter run
+
+# 4. Merchant App - Chạy trên Điện thoại thật qua USB (Terminal 3)
+adb reverse tcp:3000 tcp:3000 && adb reverse tcp:3001 tcp:3001
+cd app_merchant && flutter run
 ```
-
-#### 2️⃣ Bật Backend Server:
-```bash
-cd backend
-npm run start:dev
-```
-*(Server REST API chạy tại `http://localhost:3000`, WebSocket gateway chạy tại `ws://localhost:3001`)*
-
-#### 3️⃣ Bật Ứng dụng Di động (Flutter):
-- **App Khách hàng (`app_user`):**
-  ```bash
-  cd app_user
-  flutter run
-  ```
-- **App Cửa hàng (`app_merchant`):**
-  ```bash
-  cd app_merchant
-  flutter run
-  ```
-
-> 📱 **Mẹo cắm cáp USB chạy trên điện thoại Android thật:**
-> Chạy lệnh reverse cổng sau đây một lần để điện thoại kết nối thẳng vào backend máy tính qua `127.0.0.1`:
-> ```bash
-> adb reverse tcp:3000 tcp:3000 && adb reverse tcp:3001 tcp:3001
-> ```
 
 ---
 
-### 🛠️ 7.2. Hướng Dẫn Cài Đặt Lần Đầu (First-Time Setup)
+### 🛠️ 7.2. Cài Đặt Lần Đầu (First-Time Setup)
 
-#### Yêu cầu môi trường:
-| Phần mềm | Phiên bản khuyến nghị | Ghi chú |
-|---|---|---|
-| **Node.js** | >= 20.x (LTS) | Đi kèm npm >= 10.x |
-| **Docker & Docker Compose** | Mới nhất | Dùng để chạy PostgreSQL 16 và pgAdmin |
-| **Flutter SDK** | >= 3.x (Stable) | Dùng để build `app_user` và `app_merchant` |
-| **Git** | Mới nhất | Quản lý mã nguồn |
-| **NestJS CLI** | >= 10.x | Cài bằng `npm install -g @nestjs/cli` |
-
-#### Bước 1: Khởi động Database với Docker
 ```bash
+# 1. Khởi động DB
 docker-compose up -d
-```
-*Docker sẽ tự động tạo cơ sở dữ liệu `tingting_db` trên cổng `5432` và pgAdmin 4 trên cổng `5050`.*
 
-#### Bước 2: Cấu hình và Chạy Backend
-```bash
+# 2. Cấu hình & Chạy Backend (để TypeORM tự động tạo bảng)
 cd backend
 npm install
 cp .env.example .env
 npm run start:dev
-```
-*Ghi chú:* Khi chạy lần đầu, TypeORM sẽ tự động sinh toàn bộ bảng nhờ cờ `TYPEORM_SYNC=true` trong `.env`.
 
-#### Bước 3: Nạp Dữ Liệu Mẫu Demo (Seed Data)
-Mở một tab Terminal mới (tại thư mục `backend`):
-```bash
+# 3. Nạp dữ liệu mẫu Demo (mở tab Terminal mới tại backend)
 npm run seed
-```
-*Lệnh này sẽ tạo sẵn 5 đối tác demo (Highlands Coffee, Phúc Long, The Coffee House, Circle K, CGV Cinemas), tài khoản người dùng mẫu và hàng chục voucher đơn lẻ lẫn deal liên minh.*
 
-#### Bước 4: Tải thư viện và Chạy App Flutter
-```bash
-# Đối với User App:
-cd app_user
-flutter pub get
-flutter run
-
-# Đối với Merchant App:
-cd ../app_merchant
-flutter pub get
-flutter run
+# 4. Tải thư viện 2 App Flutter
+cd ../app_user && flutter pub get
+cd ../app_merchant && flutter pub get
 ```
 
 ---
 
-### 🔧 7.3. Gỡ Lỗi Thường Gặp (Troubleshooting)
+### 🔧 7.3. Gỡ Lỗi Nhanh
 
-- **Lỗi TypeORM: `relation "users" does not exist`**  
-  *Nguyên nhân:* TypeORM chưa đồng bộ cấu trúc bảng vào PostgreSQL.  
-  *Cách khắc phục:* Đảm bảo biến `TYPEORM_SYNC=true` trong file `backend/.env` và khởi động lại backend ít nhất một lần trước khi chạy `npm run seed`.
-
-- **Lỗi kết nối DB: `password authentication failed for user "postgres"`**  
-  *Cách khắc phục:* Kiểm tra lại mật khẩu trong `backend/.env` sao cho khớp chính xác với `POSTGRES_PASSWORD` trong `docker-compose.yml`.
-
-- **Lỗi Flutter: `SocketException: Connection refused`**  
-  *Cách khắc phục:* Đảm bảo Backend đang chạy (`npm run start:dev`). Nếu dùng thiết bị thật qua cáp USB, hãy chạy `adb reverse tcp:3000 tcp:3000 && adb reverse tcp:3001 tcp:3001`. Nếu dùng qua mạng Wi-Fi LAN, truyền thêm `--dart-define=SERVER_HOST=192.168.x.x` khi `flutter run`.
-
-- **Lỗi `nest: command not found`**  
-  *Cách khắc phục:* Cài đặt Nest CLI toàn cục bằng lệnh: `npm install -g @nestjs/cli`.
+- **`SocketException: Connection refused`:** Đảm bảo Backend đang chạy và đã gõ `adb reverse tcp:3000 tcp:3000 && adb reverse tcp:3001 tcp:3001`. Nếu kết nối qua Wi-Fi LAN, thêm `--dart-define=SERVER_HOST=<IP_LAN>` khi chạy app.
+- **`relation "users" does not exist`:** Kiểm tra `TYPEORM_SYNC=true` trong `backend/.env`, chạy backend trước rồi mới chạy `npm run seed`.
+- **`password authentication failed for user "postgres"`:** Đồng bộ `DB_PASSWORD` trong `backend/.env` khớp với `POSTGRES_PASSWORD` trong `docker-compose.yml`.
 
 ---
 
