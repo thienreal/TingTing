@@ -173,71 +173,117 @@ TingTing/
 ├── docker/                    # Cấu hình khởi tạo PostgreSQL Container
 │   └── init.sql
 ├── docker-compose.yml         # Khởi động PostgreSQL 16 & pgAdmin 4
-├── docs/                      # Tài liệu kỹ thuật chi tiết
-│   ├── Architecture.md        # Thiết kế kiến trúc tổng thể
-│   ├── DEVELOPER_GUIDE.md     # Hướng dẫn chi tiết cho lập trình viên
-│   ├── CODE_STANDARDS.md      # Quy chuẩn viết code & comment
-│   ├── UI_Design_Rules.md     # Bảng màu, tỷ lệ & quy chuẩn UI Flutter
-│   └── task_tracker.md        # Danh mục tiến độ hoàn thành các Task
-├── README.md                  # Giới thiệu tổng quan dự án (File này)
-└── SETUP.md                   # Hướng dẫn cài đặt môi trường từ A - Z
+├── README.md                  # Giới thiệu tổng quan dự án & hướng dẫn sử dụng
+└── .gitignore                 # Loại trừ file nhạy cảm và môi trường nội bộ
 ```
 
 ---
 
-## ⚡ 7. Hướng Dẫn Cài Đặt & Chạy Nhanh (Quick Start)
+## ⚡ 7. Hướng Dẫn Cài Đặt & Khởi Chạy
 
-> 💡 Để xem hướng dẫn từng bước chi tiết hơn và cách xử lý lỗi thường gặp, vui lòng tham khảo [SETUP.md](SETUP.md).
+### 🚀 7.1. Khởi Chạy Lại Nhanh (Dành cho máy đã cài đặt trước đó)
 
-### Yêu cầu tiên quyết:
-- **Node.js** >= 20.x & **npm** >= 10.x
-- **Flutter SDK** >= 3.x
-- **Docker & Docker Compose**
-- **Git**
+> **Dành cho những lần code, kiểm thử hoặc chạy demo tiếp theo** — bạn không cần phải cấu hình lại database hay cài đặt lại thư viện.
 
-### Bước 1: Khởi động Cơ sở dữ liệu (PostgreSQL)
-Tại thư mục gốc dự án:
+Chỉ cần mở các tab Terminal và chạy theo thứ tự:
+
+#### 1️⃣ Bật Database (PostgreSQL & pgAdmin):
 ```bash
 docker-compose up -d
 ```
-*Docker sẽ tự động tạo cơ sở dữ liệu `tingting_db` trên cổng `5432` và pgAdmin trên cổng `5050`.*
 
-### Bước 2: Khởi động Backend Server
+#### 2️⃣ Bật Backend Server:
+```bash
+cd backend
+npm run start:dev
+```
+*(Server REST API chạy tại `http://localhost:3000`, WebSocket gateway chạy tại `ws://localhost:3001`)*
+
+#### 3️⃣ Bật Ứng dụng Di động (Flutter):
+- **App Khách hàng (`app_user`):**
+  ```bash
+  cd app_user
+  flutter run
+  ```
+- **App Cửa hàng (`app_merchant`):**
+  ```bash
+  cd app_merchant
+  flutter run
+  ```
+
+> 📱 **Mẹo cắm cáp USB chạy trên điện thoại Android thật:**
+> Chạy lệnh reverse cổng sau đây một lần để điện thoại kết nối thẳng vào backend máy tính qua `127.0.0.1`:
+> ```bash
+> adb reverse tcp:3000 tcp:3000 && adb reverse tcp:3001 tcp:3001
+> ```
+
+---
+
+### 🛠️ 7.2. Hướng Dẫn Cài Đặt Lần Đầu (First-Time Setup)
+
+#### Yêu cầu môi trường:
+| Phần mềm | Phiên bản khuyến nghị | Ghi chú |
+|---|---|---|
+| **Node.js** | >= 20.x (LTS) | Đi kèm npm >= 10.x |
+| **Docker & Docker Compose** | Mới nhất | Dùng để chạy PostgreSQL 16 và pgAdmin |
+| **Flutter SDK** | >= 3.x (Stable) | Dùng để build `app_user` và `app_merchant` |
+| **Git** | Mới nhất | Quản lý mã nguồn |
+| **NestJS CLI** | >= 10.x | Cài bằng `npm install -g @nestjs/cli` |
+
+#### Bước 1: Khởi động Database với Docker
+```bash
+docker-compose up -d
+```
+*Docker sẽ tự động tạo cơ sở dữ liệu `tingting_db` trên cổng `5432` và pgAdmin 4 trên cổng `5050`.*
+
+#### Bước 2: Cấu hình và Chạy Backend
 ```bash
 cd backend
 npm install
-cp .env.example .env     # Kiểm tra các thông số kết nối DB
+cp .env.example .env
 npm run start:dev
 ```
-*API sẽ lắng nghe tại `http://localhost:3000`, WebSocket gateway tại cổng `3001`.*
+*Ghi chú:* Khi chạy lần đầu, TypeORM sẽ tự động sinh toàn bộ bảng nhờ cờ `TYPEORM_SYNC=true` trong `.env`.
 
-### Bước 3: Nạp dữ liệu mẫu Demo (Seed Data)
-Mở một cửa sổ Terminal mới tại thư mục `backend`:
+#### Bước 3: Nạp Dữ Liệu Mẫu Demo (Seed Data)
+Mở một tab Terminal mới (tại thư mục `backend`):
 ```bash
 npm run seed
 ```
-*Script sẽ tự động tạo 5 thương hiệu đối tác tiêu biểu (Highlands, The Coffee House, Phuc Long, CGV, Pizza 4P's), người dùng mẫu và hàng chục voucher đơn lẻ lẫn deal liên minh.*
+*Lệnh này sẽ tạo sẵn 5 đối tác demo (Highlands Coffee, Phúc Long, The Coffee House, Circle K, CGV Cinemas), tài khoản người dùng mẫu và hàng chục voucher đơn lẻ lẫn deal liên minh.*
 
-### Bước 4: Khởi chạy Ứng dụng Di động (Flutter)
-
-**Chạy App Khách hàng (`app_user`):**
+#### Bước 4: Tải thư viện và Chạy App Flutter
 ```bash
+# Đối với User App:
 cd app_user
 flutter pub get
 flutter run
-```
 
-**Chạy App Cửa hàng (`app_merchant`):**
-```bash
-cd app_merchant
+# Đối với Merchant App:
+cd ../app_merchant
 flutter pub get
 flutter run
 ```
 
-> **Mẹo kết nối thiết bị thật qua USB:**
-> Chạy lệnh `adb reverse tcp:3000 tcp:3000 && adb reverse tcp:3001 tcp:3001` để thiết bị Android thật có thể kết nối trực tiếp đến backend chạy trên máy tính qua `127.0.0.1`.
+---
+
+### 🔧 7.3. Gỡ Lỗi Thường Gặp (Troubleshooting)
+
+- **Lỗi TypeORM: `relation "users" does not exist`**  
+  *Nguyên nhân:* TypeORM chưa đồng bộ cấu trúc bảng vào PostgreSQL.  
+  *Cách khắc phục:* Đảm bảo biến `TYPEORM_SYNC=true` trong file `backend/.env` và khởi động lại backend ít nhất một lần trước khi chạy `npm run seed`.
+
+- **Lỗi kết nối DB: `password authentication failed for user "postgres"`**  
+  *Cách khắc phục:* Kiểm tra lại mật khẩu trong `backend/.env` sao cho khớp chính xác với `POSTGRES_PASSWORD` trong `docker-compose.yml`.
+
+- **Lỗi Flutter: `SocketException: Connection refused`**  
+  *Cách khắc phục:* Đảm bảo Backend đang chạy (`npm run start:dev`). Nếu dùng thiết bị thật qua cáp USB, hãy chạy `adb reverse tcp:3000 tcp:3000 && adb reverse tcp:3001 tcp:3001`. Nếu dùng qua mạng Wi-Fi LAN, truyền thêm `--dart-define=SERVER_HOST=192.168.x.x` khi `flutter run`.
+
+- **Lỗi `nest: command not found`**  
+  *Cách khắc phục:* Cài đặt Nest CLI toàn cục bằng lệnh: `npm install -g @nestjs/cli`.
 
 ---
+
 
 ## 🛣️ 8. Lộ Trình Phát Triển (Roadmap)
 
