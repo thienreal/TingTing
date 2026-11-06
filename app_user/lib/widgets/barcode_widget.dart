@@ -88,21 +88,24 @@ class BarcodePainter extends CustomPainter {
 
 class BarcodeDisplayWidget extends StatelessWidget {
   final String code;
+  final String? copyValue;
   final double height;
   final bool showCopyButton;
 
   const BarcodeDisplayWidget({
     super.key,
     required this.code,
+    this.copyValue,
     this.height = 70,
     this.showCopyButton = true,
   });
 
   void _copyToClipboard(BuildContext context) {
-    Clipboard.setData(ClipboardData(text: code));
+    final textToCopy = copyValue ?? code;
+    Clipboard.setData(ClipboardData(text: textToCopy));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Đã sao chép mã: $code'),
+        content: Text('Đã sao chép mã voucher: $textToCopy'),
         backgroundColor: AppColors.textPrimary,
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,

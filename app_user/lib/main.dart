@@ -24,6 +24,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'core/api_client.dart';
 import 'core/theme.dart';
 import 'core/router.dart';
 import 'core/socket_client.dart';
@@ -36,6 +37,12 @@ final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Mặc định kết nối tới 127.0.0.1 (hỗ trợ adb reverse qua cáp USB).
+  // Có thể ghi đè bằng --dart-define=SERVER_HOST=192.168.x.x khi chạy qua Wi-Fi.
+  const host = String.fromEnvironment('SERVER_HOST', defaultValue: '127.0.0.1');
+  ApiClient.customServerHost = host;
+
   runApp(
     const ProviderScope(
       child: TingTingApp(),

@@ -75,13 +75,94 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     }
   }
 
+  static final _uuidRegex = RegExp(
+    r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+  );
+
   void _handleCodeScanned(String code) {
-    _manualCodeController.text = code;
+    final trimmed = code.trim();
+
     if (_currentMode == ScanMode.earnPoints) {
-      _showBillAmountDialog(code);
+      // Kiểm tra nếu quét nhầm mã voucher
+      if (trimmed.startsWith('tingting:voucher:')) {
+        _showScanWarning('Đây là mã voucher. Vui lòng chuyển sang tab "Trừ voucher".');
+        return;
+      }
+
+      String parsedUserId = trimmed;
+
+      // Phân tích mã Dynamic QR định danh: tingting:earn:<userId>:<timestamp>
+      if (trimmed.startsWith('tingting:earn:')) {
+        final parts = trimmed.split(':');
+        if (parts.length >= 3) {
+          parsedUserId = parts[2].trim();
+        }
+
+        // Kiểm tra thời gian hết hạn của Dynamic QR (nếu có timestamp)
+        if (parts.length >= 4) {
+          final timestamp = int.tryParse(parts[3]);
+          if (timestamp != null) {
+            final now = DateTime.now().millisecondsSinceEpoch;
+            final diffSeconds = (now - timestamp) / 1000;
+            // Cho phép độ trễ tối đa 5 phút để tránh lệch đồng hồ thiết bị
+            if (diffSeconds > 300) {
+              _showScanWarning('Mã QR đã hết hạn. Vui lòng yêu cầu khách bấm làm mới mã trên App.');
+              return;
+            }
+          }
+        }
+      }
+
+      // Khách hàng chưa đăng nhập trên App User
+      if (parsedUserId == 'guest-user-id') {
+        _showScanWarning('Khách hàng chưa đăng nhập tài khoản TingTing trên App.');
+        return;
+      }
+
+      // Kiểm tra tính hợp lệ của UUID v4
+      if (!_uuidRegex.hasMatch(parsedUserId)) {
+        _showScanWarning('Mã khách hàng không hợp lệ (không đúng định dạng UUID).');
+        return;
+      }
+
+      _manualCodeController.text = parsedUserId;
+      _showBillAmountDialog(parsedUserId);
     } else {
-      _confirmUseVoucher(code);
+      // Chế độ Trừ voucher (ScanMode.useVoucher)
+      // Kiểm tra nếu quét nhầm mã QR tích điểm của khách
+      if (trimmed.startsWith('tingting:earn:')) {
+        _showScanWarning('Đây là mã tích điểm của khách. Vui lòng chuyển sang tab "Tích điểm".');
+        return;
+      }
+
+      String parsedVoucherId = trimmed;
+      if (trimmed.startsWith('tingting:voucher:')) {
+        final parts = trimmed.split(':');
+        if (parts.length >= 3) {
+          parsedVoucherId = parts[2].trim();
+        }
+      }
+
+      // Kiểm tra tính hợp lệ của UUID v4
+      if (!_uuidRegex.hasMatch(parsedVoucherId)) {
+        _showScanWarning('Mã voucher không hợp lệ (yêu cầu chuỗi UUID đầy đủ).');
+        return;
+      }
+
+      _manualCodeController.text = parsedVoucherId;
+      _confirmUseVoucher(parsedVoucherId);
     }
+  }
+
+  void _showScanWarning(String message) {
+    _hasScanned = false;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.action,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   void _showBillAmountDialog(String userId) {

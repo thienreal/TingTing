@@ -25,6 +25,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../../core/theme.dart';
 import '../../widgets/ticket_notch_clipper.dart';
 import '../../widgets/barcode_widget.dart';
@@ -131,9 +132,43 @@ class MyVoucherBarcodeScreen extends ConsumerWidget {
                     // Mã vạch vector
                     BarcodeDisplayWidget(
                       code: displayCode,
+                      copyValue: item.id,
                       height: 80,
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
+
+                    // Mã QR hỗ trợ máy quét camera tại quầy
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.border.withOpacity(0.5)),
+                      ),
+                      child: Column(
+                        children: [
+                          QrImageView(
+                            data: 'tingting:voucher:${item.id}',
+                            version: QrVersions.auto,
+                            size: 140,
+                            eyeStyle: const QrEyeStyle(
+                              eyeShape: QrEyeShape.square,
+                              color: AppColors.textPrimary,
+                            ),
+                            dataModuleStyle: const QrDataModuleStyle(
+                              dataModuleShape: QrDataModuleShape.square,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Hoặc quét mã QR này tại quầy',
+                            style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
 
                     // Đường nét đứt ngang
                     CustomPaint(

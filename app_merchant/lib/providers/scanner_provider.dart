@@ -115,10 +115,19 @@ class ScannerNotifier extends Notifier<ScannerState> {
     state = state.copyWith(isProcessing: true, errorMessage: null);
 
     try {
+      // Làm sạch userId nếu vô tình nhận chuỗi tingting:earn:<userId>:<timestamp>
+      String cleanUserId = userId.trim();
+      if (cleanUserId.startsWith('tingting:earn:')) {
+        final parts = cleanUserId.split(':');
+        if (parts.length >= 3) {
+          cleanUserId = parts[2].trim();
+        }
+      }
+
       final response = await ApiClient.dio.post(
         '/points/earn',
         data: {
-          'user_id': userId.trim(),
+          'user_id': cleanUserId,
           'bill_amount': billAmount,
         },
       );
@@ -162,10 +171,19 @@ class ScannerNotifier extends Notifier<ScannerState> {
     state = state.copyWith(isProcessing: true, errorMessage: null);
 
     try {
+      // Làm sạch voucherId nếu chứa tiền tố tingting:voucher:
+      String cleanVoucherId = userVoucherId.trim();
+      if (cleanVoucherId.startsWith('tingting:voucher:')) {
+        final parts = cleanVoucherId.split(':');
+        if (parts.length >= 3) {
+          cleanVoucherId = parts[2].trim();
+        }
+      }
+
       final response = await ApiClient.dio.post(
         '/points/use-voucher',
         data: {
-          'user_voucher_id': userVoucherId.trim(),
+          'user_voucher_id': cleanVoucherId,
         },
       );
 
