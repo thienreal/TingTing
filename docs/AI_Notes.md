@@ -648,4 +648,27 @@
 - **Mục đích:** Đảm bảo hệ sinh thái TingTing có đầy đủ cả 2 ứng dụng di động: App khách hàng (Tích & Đổi điểm) và App thu ngân/đối tác (Cộng điểm & Áp dụng voucher).
 - **Lợi ích:** Cho phép kiểm thử khép kín toàn bộ luồng trải nghiệm người dùng thực tế: Khách mua hàng -> Thu ngân quét mã tích điểm -> Khách đổi voucher -> Thu ngân quét trừ voucher.
 
+## Hoàn thiện README.md chuẩn GitHub & Nâng cấp Trải nghiệm Quét Mã QR/Barcode - 2026-11-06
+- **Ngày giờ thực hiện:** 2026-11-06 19:48:00
+- **Các công việc đã thực hiện:**
+  1. **Nâng cấp toàn diện `README.md` theo chuẩn chuyên nghiệp cho GitHub:**
+     - Thiết kế hệ thống badge động trực quan (Flutter 3.x, NestJS 10.x, TypeScript, PostgreSQL 16, TypeORM, Socket.IO, Docker).
+     - Giới thiệu tổng quan dự án, bối cảnh bài toán phân mảnh ứng dụng thẻ thành viên trong ngành bán lẻ/F&B và giải pháp hệ sinh thái liên minh TingTing cho cuộc thi Khởi nghiệp 2026 trường Đại học Mở TP.HCM.
+     - Tích hợp sơ đồ kiến trúc hệ thống trực quan bằng Mermaid (User App, Merchant App, Backend NestJS API Gateway, Socket.IO Gateway, PostgreSQL, pgAdmin).
+     - Bảng tổng hợp Tech Stack và vai trò kỹ thuật chi tiết.
+     - Mô tả đầy đủ các tính năng nổi bật của User App, Merchant App và tính năng đột phá: Liên minh tung deal kích cầu chéo (Cross-Merchant Promotion).
+     - Sơ đồ cấu trúc thư mục Monorepo trực quan, dễ tiếp cận.
+     - Hướng dẫn cài đặt và khởi chạy nhanh (Quick Start) bằng Docker Compose, nạp Seed Data và chạy 2 ứng dụng di động.
+     - Cập nhật lộ trình phát triển (Roadmap) 4 giai đoạn, mô hình kinh doanh (SaaS, Success Fee, Marketing, Analytics) và thông tin danh sách đội ngũ 5 thành viên.
+  2. **Tối ưu trải nghiệm quét mã & kết nối mạng di động:**
+     - `app_user`: Bổ sung mã QR bên dưới Barcode vector trong `MyVoucherBarcodeScreen` bằng `QrImageView` giúp thu ngân dễ dàng quét bằng Camera máy tính bảng/điện thoại; thêm `copyValue` cho `BarcodeDisplayWidget` để sao chép chuẩn UUID gốc; hỗ trợ cấu hình `--dart-define=SERVER_HOST` linh hoạt.
+     - `app_merchant`: Bổ sung kiểm tra định dạng UUID v4 và xử lý phân biệt thông minh giữa mã QR tích điểm khách hàng (`tingting:earn:`) và mã voucher (`tingting:voucher:`), cảnh báo SnackBar trực quan khi quét nhầm tab.
+  3. **Kiểm tra chất lượng mã nguồn:**
+     - Chạy `flutter analyze` cho cả `app_user` và `app_merchant`: 0 errors, 0 warnings.
+     - Chạy `npm run build` cho `backend`: build TypeScript thành công 100%.
+- **Lý do:** Đáp ứng yêu cầu của người dùng về việc làm file README chỉn chu, chuyên nghiệp và đưa lên repository GitHub của dự án.
+- **Mục đích:** Giúp người xem, ban giám khảo cuộc thi khởi nghiệp và các lập trình viên khác nắm bắt nhanh chóng toàn bộ kiến trúc, giá trị kinh doanh và cách chạy dự án TingTing.
+- **Lợi ích:** Tăng độ hoàn thiện, chuyên nghiệp của repository GitHub và cải thiện độ ổn định khi demo thực tế.
+
+
 
