@@ -184,246 +184,212 @@ class _VoucherDetailScreenState extends ConsumerState<VoucherDetailScreen> {
       backgroundColor: AppColors.background,
       body: Stack(
         children: [
-          CustomScrollView(
-            slivers: [
-              // ==========================================
-              // TOP HERO IMAGE VỚI NÚT QUAY LẠI
-              // ==========================================
-              SliverToBoxAdapter(
-                child: Stack(
-                  children: [
-                    SizedBox(
-                      height: 250,
-                      width: double.infinity,
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Image.network(
-                            voucher.realImageUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Container(
-                              color: AppColors.action,
-                              child: const Center(
-                                child: Icon(Icons.card_giftcard_rounded, size: 64, color: Colors.white),
-                              ),
+          SingleChildScrollView(
+            child: Stack(
+              children: [
+                // ==========================================
+                // 1. TOP HERO IMAGE
+                // ==========================================
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 250,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.network(
+                        voucher.realImageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: AppColors.action,
+                          child: const Center(
+                            child: Icon(Icons.card_giftcard_rounded, size: 64, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      // Lớp gradient mờ tăng tương phản cho icon và tiêu đề
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.black.withOpacity(0.4),
+                              Colors.transparent,
+                              Colors.black.withOpacity(0.6),
+                            ],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            stops: const [0.0, 0.4, 1.0],
+                          ),
+                        ),
+                      ),
+                      // Badge tên thương hiệu góc dưới ảnh
+                      Positioned(
+                        bottom: 40,
+                        left: 16,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.65),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            voucher.isCrossMerchant
+                                ? '${voucher.merchantName.toUpperCase()} ➔ ${voucher.targetMerchantName.toUpperCase()}'
+                                : voucher.merchantName.toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.0,
                             ),
                           ),
-                          // Lớp gradient mờ tăng tương phản cho icon và tiêu đề
-                          Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.black.withOpacity(0.4),
-                                  Colors.transparent,
-                                  Colors.black.withOpacity(0.6),
-                                ],
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                stops: const [0.0, 0.4, 1.0],
-                              ),
-                            ),
-                          ),
-                          // Badge tên thương hiệu góc dưới ảnh
-                          Positioned(
-                            bottom: 40,
-                            left: 16,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.65),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                voucher.isCrossMerchant
-                                    ? '${voucher.merchantName.toUpperCase()} ➔ ${voucher.targetMerchantName.toUpperCase()}'
-                                    : voucher.merchantName.toUpperCase(),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 1.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // ==========================================
+                // 2. NỘI DUNG CHÍNH (ĐÈ LÊN CẠNH DƯỚI ẢNH)
+                // ==========================================
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 215, 16, 120),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // THẺ TICKET NOTCH (VẾT CẮT BÁN NGUYỆT 2 BÊN)
+                      TicketContainer(
+                        notchRadius: 12,
+                        notchPosition: voucher.isCrossMerchant ? 0.68 : 0.62,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (voucher.isCrossMerchant) ...[
+                              Container(
+                                margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: AppColors.actionLight,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.handshake_rounded, size: 16, color: AppColors.action),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'ƯU ĐÃI LIÊN KẾT KÍCH CẦU CHÉO\nTài trợ bởi ${voucher.merchantName} • Áp dụng tại ${voucher.targetMerchantName}',
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.action,
+                                          height: 1.3,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            CircleAvatar(
-                              backgroundColor: Colors.white.withOpacity(0.9),
-                              child: IconButton(
-                                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.textPrimary),
-                                onPressed: () => context.pop(),
+                            ],
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    voucher.title,
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Hạn dùng: ${voucher.expiredAt.day}/${voucher.expiredAt.month}/${voucher.expiredAt.year} · Còn lại: ${voucher.remainingQuantity}',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.textSecondary,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            CircleAvatar(
-                              backgroundColor: Colors.white.withOpacity(0.9),
-                              child: const Icon(Icons.favorite_border_rounded, size: 20, color: AppColors.action),
+
+                            // Đường nét đứt nối giữa 2 vết cắt
+                            CustomPaint(
+                              size: const Size(double.infinity, 1),
+                              painter: DashedLinePainter(),
+                            ),
+
+                            // Phần chân vé: Logo & Thông tin Merchant
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 38,
+                                    height: 38,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primaryLight,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Center(
+                                      child: Icon(Icons.storefront_rounded, color: AppColors.textPrimary),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          voucher.isCrossMerchant
+                                              ? 'ÁP DỤNG: ${voucher.targetMerchantName.toUpperCase()}'
+                                              : voucher.merchantName.toUpperCase(),
+                                          style: const TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.textPrimary,
+                                          ),
+                                        ),
+                                        if (voucher.isCrossMerchant) ...[
+                                          Text(
+                                            'Tài trợ: ${voucher.merchantName}',
+                                            style: const TextStyle(
+                                              fontSize: 11,
+                                              color: AppColors.textSecondary,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primaryLight,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      voucher.isCrossMerchant ? 'Liên minh' : 'Đối tác TingTing',
+                                      style: const TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF996500),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                      const SizedBox(height: 20),
 
-              // ==========================================
-              // THẺ TICKET NOTCH (VẾT CẮT BÁN NGUYỆT 2 BÊN)
-              // ==========================================
-              SliverToBoxAdapter(
-                child: Transform.translate(
-                  offset: const Offset(0, -30),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: TicketContainer(
-                      notchRadius: 12,
-                      notchPosition: 0.65,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          if (voucher.isCrossMerchant) ...[
-                            Container(
-                              margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: AppColors.actionLight,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.handshake_rounded, size: 16, color: AppColors.action),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      'ƯU ĐÃI LIÊN KẾT KÍCH CẦU CHÉO\nTài trợ bởi ${voucher.merchantName} • Áp dụng tại ${voucher.targetMerchantName}',
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.action,
-                                        height: 1.3,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-                            child: Column(
-                              children: [
-                                Text(
-                                  voucher.title,
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Hạn dùng: ${voucher.expiredAt.day}/${voucher.expiredAt.month}/${voucher.expiredAt.year} · Còn lại: ${voucher.remainingQuantity}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.textSecondary,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          // Đường nét đứt nối giữa 2 vết cắt
-                          CustomPaint(
-                            size: const Size(double.infinity, 1),
-                            painter: DashedLinePainter(),
-                          ),
-
-                          // Phần chân vé: Logo & Thông tin Merchant
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 38,
-                                  height: 38,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primaryLight,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: const Center(
-                                    child: Icon(Icons.storefront_rounded, color: AppColors.textPrimary),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        voucher.isCrossMerchant
-                                            ? 'ÁP DỤNG: ${voucher.targetMerchantName.toUpperCase()}'
-                                            : voucher.merchantName.toUpperCase(),
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w700,
-                                          color: AppColors.textPrimary,
-                                        ),
-                                      ),
-                                      if (voucher.isCrossMerchant) ...[
-                                        Text(
-                                          'Tài trợ: ${voucher.merchantName}',
-                                          style: const TextStyle(
-                                            fontSize: 11,
-                                            color: AppColors.textSecondary,
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primaryLight,
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    voucher.isCrossMerchant ? 'Liên minh' : 'Đối tác TingTing',
-                                    style: const TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(0xFF996500),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              // ==========================================
-              // ĐIỀU KIỆN SỬ DỤNG & CÁCH DÙNG
-              // ==========================================
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
                       // Banner tìm cửa hàng
                       Container(
                         padding: const EdgeInsets.all(16),
@@ -497,8 +463,33 @@ class _VoucherDetailScreenState extends ConsumerState<VoucherDetailScreen> {
                     ],
                   ),
                 ),
-              ),
-            ],
+
+                // ==========================================
+                // 3. TOP ACTION BUTTONS (QUAY LẠI & YÊU THÍCH)
+                // ==========================================
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: Colors.white.withOpacity(0.9),
+                          child: IconButton(
+                            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: AppColors.textPrimary),
+                            onPressed: () => context.pop(),
+                          ),
+                        ),
+                        CircleAvatar(
+                          backgroundColor: Colors.white.withOpacity(0.9),
+                          child: const Icon(Icons.favorite_border_rounded, size: 20, color: AppColors.action),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
 
           // ==========================================
