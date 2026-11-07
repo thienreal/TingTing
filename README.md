@@ -181,24 +181,24 @@ TingTing/
 
 ## ⚡ 7. Hướng Dẫn Khởi Chạy
 
-### 🚀 7.1. Quick Run (Chạy lại cho máy đã cài đặt)
+### 🚀 7.1. Quick Run 1-Chạm (Khởi chạy nhanh nhất)
 
-> 💡 **Mô hình test thực tế:** Client App (`app_user`) chạy trên **Laptop**, Merchant App (`app_merchant`) chạy trên **Điện thoại thật** (dùng camera quét mã QR/Barcode).
+> 💡 **Mô hình test:** Client App (`app_user`) chạy trên **Laptop**, Merchant App (`app_merchant`) chạy trên **Điện thoại thật**.
 
+Chỉ cần mở terminal tại thư mục gốc và chạy 1 lệnh duy nhất:
 ```bash
-# 1. Bật Database
-docker-compose up -d
-
-# 2. Bật Backend (Terminal 1)
-cd backend && npm run start:dev
-
-# 3. Client App (User) - Chạy trên Laptop (Terminal 2)
-cd app_user && flutter run -d linux   # hoặc: flutter run
-
-# 4. Merchant App - Chạy trên Điện thoại thật qua USB (Terminal 3)
-adb reverse tcp:3000 tcp:3000 && adb reverse tcp:3001 tcp:3001
-cd app_merchant && flutter run
+./run.sh
 ```
+
+Script sẽ tự động thực hiện trọn gói:
+1. ✅ Bật Database PostgreSQL (Docker).
+2. ✅ Khởi động Backend NestJS server ngầm tại `localhost:3000`.
+3. ✅ Đảo cổng `adb reverse` và tự mở **Merchant App** trên điện thoại Android (khi cắm cáp USB).
+4. ✅ Mở cửa sổ **Client App** ngay trên màn hình Laptop (< 1 giây).
+
+*Các lệnh hữu ích khác:*
+- `./run.sh --dev` : Chạy Client App với chế độ Flutter Hot Reload (nhấn `r` để cập nhật code tức thì).
+- `./stop.sh` : Tắt nhanh toàn bộ Client App và Backend Server đang chạy ngầm.
 
 ---
 
